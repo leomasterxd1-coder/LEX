@@ -1,5 +1,6 @@
 package com.lex.app.platform
 
+import android.util.Log
 import com.lex.app.data.Device
 import com.lex.app.data.PrintSettings
 import kotlinx.coroutines.Dispatchers
@@ -13,9 +14,10 @@ import java.net.URL
 
 object DirectPrinterClient {
 
-    suspend fun sendPdf(
+    suspend fun send(
         device: Device,
-        pdf: File,
+        pdf: File?,
+        postScript: File?,
         jobName: String,
         settings: PrintSettings
     ): Result<Unit> = withContext(Dispatchers.IO) {
@@ -23,6 +25,11 @@ object DirectPrinterClient {
         if (rawAddress.isBlank()) {
             return@withContext Result.failure(
                 IllegalArgumentException("Cadastre o endereço IP da impressora antes de imprimir.")
+            )
+        }
+        if (pdf == null && postScript == null) {
+            return@withContext Result.failure(
+                IllegalStateException("Nenhum documento foi gerado para impressão.")
             )
         }
 
@@ -35,37 +42,54 @@ object DirectPrinterClient {
         }
 
         if (explicitPort == RAW_PORT) {
-            return@withContext runCatching { sendRaw(host, RAW_PORT, pdf) }
+            if (postScript == null) {
+                return@withContext Result.failure(
+                    IllegalStateException(
+                        "Esta impressora usa PostScript na porta 9100 e o arquivo não pôde ser convertido."
+                    )
+                )
+            }
+            return@withContext runCatching { sendRaw(host, RAW_PORT, postScript) }
+                .onFailure { Log.e(TAG, "Falha no envio PostScript para $host:$RAW_PORT", it) }
         }
 
         val ippPort = explicitPort ?: IPP_PORT
-        val ippResult = runCatching {
-            val errors = mutableListOf<Throwable>()
-            for (path in listOf("/ipp/print", "/ipp/printer")) {
-                val attempt = runCatching { sendIpp(host, ippPort, path, pdf, jobName, settings) }
-                if (attempt.isSuccess) return@runCatching
-                attempt.exceptionOrNull()?.let { errors += it }
+        if (pdf != null) {
+            val ippResult = runCatching {
+                val errors = mutableListOf<Throwable>()
+                for (path in listOf("/ipp/print", "/ipp/printer")) {
+                    val attempt = runCatching { sendIpp(host, ippPort, path, pdf, jobName, settings) }
+                    if (attempt.isSuccess) return@runCatching
+                    attempt.exceptionOrNull()?.let { errors += it }
+                }
+                throw errors.lastOrNull() ?: IllegalStateException("Falha na impressão IPP.")
             }
-            throw errors.lastOrNull() ?: IllegalStateException("Falha na impressão IPP.")
-        }
-        if (ippResult.isSuccess) {
-            return@withContext Result.success(Unit)
+            if (ippResult.isSuccess) return@withContext Result.success(Unit)
+
+            if (postScript == null) {
+                val failure = ippResult.exceptionOrNull()
+                    ?: IllegalStateException("A impressora não aceitou o PDF via IPP.")
+                Log.e(TAG, "Falha IPP sem fallback PostScript em $host:$ippPort", failure)
+                return@withContext Result.failure(
+                    IllegalStateException(
+                        "A impressora não aceitou o PDF via IPP e não foi possível convertê-lo para PostScript.",
+                        failure
+                    )
+                )
+            }
+            Log.w(TAG, "IPP falhou; tentando PostScript na porta $RAW_PORT", ippResult.exceptionOrNull())
         }
 
-        if (explicitPort == null) {
-            val rawResult = runCatching { sendRaw(host, RAW_PORT, pdf) }
+        if (postScript != null) {
+            val rawResult = runCatching { sendRaw(host, RAW_PORT, postScript) }
             if (rawResult.isSuccess) return@withContext Result.success(Unit)
-            return@withContext Result.failure(
-                rawResult.exceptionOrNull()
-                    ?: ippResult.exceptionOrNull()
-                    ?: IllegalStateException("Não foi possível enviar o trabalho para a impressora.")
-            )
+            val failure = rawResult.exceptionOrNull()
+                ?: IllegalStateException("Não foi possível enviar o trabalho para a impressora.")
+            Log.e(TAG, "Falha no envio PostScript para $host:$RAW_PORT", failure)
+            return@withContext Result.failure(failure)
         }
 
-        Result.failure(
-            ippResult.exceptionOrNull()
-                ?: IllegalStateException("Não foi possível imprimir em $host:$ippPort.")
-        )
+        Result.failure(IllegalStateException("Não foi possível imprimir em $host:$ippPort."))
     }
 
     private fun sendIpp(host: String, port: Int, path: String, pdf: File, jobName: String, settings: PrintSettings) {
@@ -220,6 +244,7 @@ object DirectPrinterClient {
         .removePrefix("https://")
         .substringBefore("/")
 
+    private const val TAG = "LEXPrint"
     private const val IPP_PORT = 631
     private const val RAW_PORT = 9100
 }

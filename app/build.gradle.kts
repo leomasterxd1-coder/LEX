@@ -16,8 +16,8 @@ android {
         applicationId = "com.lex.app"
         minSdk = 29
         targetSdk = 36
-        versionCode = 6
-        versionName = "1.0.5"
+        versionCode = 8
+        versionName = "1.0.7"
 
         ndk {
             abiFilters += listOf("arm64-v8a")

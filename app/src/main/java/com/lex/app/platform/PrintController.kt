@@ -21,8 +21,14 @@ object PrintController {
         jobName: String,
         settings: PrintSettings
     ): Result<Unit> = runCatching {
-        val pdf = withContext(Dispatchers.IO) { preparePdf(context, uri) }
-        DirectPrinterClient.sendPdf(device, pdf, jobName, settings).getOrThrow()
+        val payload = withContext(Dispatchers.IO) { preparePayload(context, uri, settings) }
+        DirectPrinterClient.send(
+            device,
+            payload.pdf,
+            payload.postScript,
+            jobName,
+            settings
+        ).getOrThrow()
     }
 
     suspend fun printUris(
@@ -34,7 +40,10 @@ object PrintController {
     ): Result<Unit> = runCatching {
         require(uris.isNotEmpty()) { "Selecione pelo menos uma página." }
         val pdf = withContext(Dispatchers.IO) { PdfUtils.pdfFromUris(context, uris) }
-        DirectPrinterClient.sendPdf(device, pdf, jobName, settings).getOrThrow()
+        val postScript = withContext(Dispatchers.IO) {
+            runCatching { PostScriptUtils.fromUris(context, uris, settings) }.getOrNull()
+        }
+        DirectPrinterClient.send(device, pdf, postScript, jobName, settings).getOrThrow()
     }
 
     suspend fun printText(
@@ -45,7 +54,10 @@ object PrintController {
         settings: PrintSettings
     ): Result<Unit> = runCatching {
         val pdf = withContext(Dispatchers.IO) { PdfUtils.pdfFromText(context, text).first }
-        DirectPrinterClient.sendPdf(device, pdf, jobName, settings).getOrThrow()
+        val postScript = withContext(Dispatchers.IO) {
+            runCatching { PostScriptUtils.fromText(context, text, settings) }.getOrNull()
+        }
+        DirectPrinterClient.send(device, pdf, postScript, jobName, settings).getOrThrow()
     }
 
     @Suppress("DEPRECATION")
@@ -72,19 +84,29 @@ object PrintController {
         }
         return runCatching {
             val pdf = withContext(Dispatchers.IO) { PdfUtils.pdfFromBitmap(context, bitmap) }
-            DirectPrinterClient.sendPdf(device, pdf, jobName, settings).getOrThrow()
+            val postScript = withContext(Dispatchers.IO) {
+                runCatching { PostScriptUtils.fromBitmap(context, bitmap, settings) }.getOrNull()
+            }
+            DirectPrinterClient.send(device, pdf, postScript, jobName, settings).getOrThrow()
         }.also {
             bitmap.recycle()
         }
     }
 
-    private fun preparePdf(context: Context, uri: Uri): File {
+    private data class Payload(val pdf: File?, val postScript: File?)
+
+    private fun preparePayload(context: Context, uri: Uri, settings: PrintSettings): Payload {
         val mime = context.contentResolver.getType(uri).orEmpty()
         val name = PdfUtils.displayName(context, uri).lowercase()
         return when {
             mime.startsWith("image/") || name.endsWith(".png") || name.endsWith(".jpg") ||
                 name.endsWith(".jpeg") || name.endsWith(".webp") -> {
-                PdfUtils.pdfFromUris(context, listOf(uri))
+                Payload(
+                    pdf = PdfUtils.pdfFromUris(context, listOf(uri)),
+                    postScript = runCatching {
+                        PostScriptUtils.fromUris(context, listOf(uri), settings)
+                    }.getOrNull()
+                )
             }
 
             mime == "application/pdf" || name.endsWith(".pdf") -> {
@@ -92,7 +114,12 @@ object PrintController {
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     FileOutputStream(file).use { output -> input.copyTo(output) }
                 } ?: error("Não foi possível abrir o PDF selecionado.")
-                file
+                Payload(
+                    pdf = file,
+                    postScript = runCatching {
+                        PostScriptUtils.fromPdf(context, file, settings)
+                    }.getOrNull()
+                )
             }
 
             mime.startsWith("text/") || name.endsWith(".txt") || name.endsWith(".csv") ||
@@ -108,7 +135,12 @@ object PrintController {
                     }
                     builder.toString()
                 } ?: error("Não foi possível ler o arquivo selecionado.")
-                PdfUtils.pdfFromText(context, text).first
+                Payload(
+                    pdf = PdfUtils.pdfFromText(context, text).first,
+                    postScript = runCatching {
+                        PostScriptUtils.fromText(context, text, settings)
+                    }.getOrNull()
+                )
             }
 
             else -> error("Este tipo de arquivo não é compatível com impressão direta.")

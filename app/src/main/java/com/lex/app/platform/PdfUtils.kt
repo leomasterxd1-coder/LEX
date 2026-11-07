@@ -81,7 +81,7 @@ object PdfUtils {
             textSize = 11f
             typeface = Typeface.MONOSPACE
         }
-        val margin = 40f
+        val margin = 24f
         val lineHeight = 15f
         val maxWidth = PAGE_WIDTH - margin * 2
         val lines = buildList {
@@ -256,7 +256,7 @@ object PdfUtils {
 
     private fun drawBitmapOnPage(canvas: Canvas, bitmap: Bitmap) {
         canvas.drawColor(Color.WHITE)
-        val margin = 24f
+        val margin = 6f
         val availableWidth = PAGE_WIDTH - margin * 2
         val availableHeight = PAGE_HEIGHT - margin * 2
         val scale = minOf(availableWidth / bitmap.width, availableHeight / bitmap.height)

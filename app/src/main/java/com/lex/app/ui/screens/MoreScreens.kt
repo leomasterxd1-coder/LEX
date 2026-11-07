@@ -458,7 +458,7 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "LEX 1.0.5",
+                "LEX 1.0.7",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -471,6 +471,9 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             Bullet("Ícones originais portados para a tela inicial.")
             Bullet("Correção definitiva do retorno para a aba Início.")
             Bullet("Textos dos ícones da tela inicial corrigidos.")
+            Bullet("Margens do PDF reduzidas, principalmente no lado esquerdo.")
+            Bullet("Geração de PostScript para impressão direta, corrigindo o erro setpagedevice em impressoras PostScript.")
+            Bullet("Diagnóstico detalhado para falhas de impressão direta por IP.")
             Bullet("Produzido por Leo Lopes.")
             Bullet("Digitalize com a câmera, o seletor de fotos ou uma página de scanner simulada.")
             Bullet("Descubra impressoras compatíveis com NSD/mDNS e adicione dispositivos manualmente.")
