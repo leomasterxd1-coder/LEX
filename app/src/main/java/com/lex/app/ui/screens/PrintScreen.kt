@@ -138,6 +138,7 @@ fun PrintScreen(
             PrintController.printUri(
                 context,
                 uri,
+                selectedDevice,
                 selectedName.ifBlank { "Documento" },
                 printSettings
             )
@@ -148,9 +149,9 @@ fun PrintScreen(
                         printSettings.copies,
                         printSettings.color,
                         printSettings.duplex,
-                        "Enviado para ${selectedDevice.name}"
+                        "Enviado para ${selectedDevice.address}"
                     )
-                    Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Enviado diretamente para ${selectedDevice.address}", Toast.LENGTH_LONG).show()
                 }
                 .onFailure {
                     Toast.makeText(

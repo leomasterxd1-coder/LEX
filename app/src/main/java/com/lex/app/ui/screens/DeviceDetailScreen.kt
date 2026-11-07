@@ -169,10 +169,11 @@ fun DeviceDetailScreen(
                             PrintController.printText(
                                 context,
                                 "LEX — Página de teste\n\nDispositivo: ${device.name}\nModelo: ${device.model}\nEndereço: ${device.address}\nData: $stamp",
+                                device,
                                 "Página de teste",
                                 state.printSettings
                             ).onSuccess {
-                                Toast.makeText(context, "Abrindo a página de teste…", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Página de teste enviada diretamente para ${device.address}", Toast.LENGTH_LONG).show()
                             }.onFailure {
                                 Toast.makeText(
                                     context,

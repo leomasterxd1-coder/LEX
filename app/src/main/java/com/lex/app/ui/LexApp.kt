@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -142,8 +141,12 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
 
     fun navigateTopLevel(route: String) {
         if (currentRoute == route) return
+        if (route == Routes.HOME) {
+            val returnedHome = navController.popBackStack(Routes.HOME, inclusive = false)
+            if (returnedHome) return
+        }
         navController.navigate(route) {
-            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            popUpTo(Routes.HOME) { saveState = true }
             launchSingleTop = true
             restoreState = true
         }

@@ -142,6 +142,35 @@ object PdfUtils {
         return output
     }
 
+    fun pdfFromBitmap(context: Context, bitmap: Bitmap): File {
+        val output = File(context.cacheDir, "lex_web_${System.currentTimeMillis()}.pdf")
+        val document = PdfDocument()
+        try {
+            val pageHeightPx = (bitmap.width.toFloat() * PAGE_HEIGHT / PAGE_WIDTH)
+                .toInt()
+                .coerceAtLeast(1)
+            var y = 0
+            var pageNumber = 1
+            while (y < bitmap.height && pageNumber <= 50) {
+                val chunkHeight = minOf(pageHeightPx, bitmap.height - y)
+                val chunk = Bitmap.createBitmap(bitmap, 0, y, bitmap.width, chunkHeight)
+                val page = document.startPage(
+                    PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, pageNumber).create()
+                )
+                drawBitmapOnPage(page.canvas, chunk)
+                document.finishPage(page)
+                chunk.recycle()
+                y += chunkHeight
+                pageNumber++
+            }
+            if (pageNumber == 1) error("Nenhuma página pôde ser criada a partir da página da web.")
+            FileOutputStream(output).use { document.writeTo(it) }
+        } finally {
+            document.close()
+        }
+        return output
+    }
+
     fun createSimulatedScan(context: Context): Uri {
         val bitmap = Bitmap.createBitmap(1240, 1754, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)

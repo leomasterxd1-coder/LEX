@@ -306,8 +306,15 @@ private fun AddDeviceDialog(
                 OutlinedTextField(
                     value = address,
                     onValueChange = { address = it },
-                    label = { Text("Endereço IP ou nome do host") },
+                    label = { Text("Endereço IP da impressora") },
+                    placeholder = { Text("ex.: 192.168.1.50 ou 192.168.1.50:9100") },
                     modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    "A impressora precisa estar ligada e na mesma rede do celular.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
                 )
                 DropdownChoice(
                     label = "Tipo",
@@ -341,14 +348,15 @@ private fun AddDeviceDialog(
                     onAdd(
                         Device(
                             name = name.ifBlank { "Dispositivo manual" },
-                            address = address,
+                            address = address.trim(),
                             type = type,
                             color = color,
                             scan = scan,
                             web = web
                         )
                     )
-                }
+                },
+                enabled = address.isNotBlank()
             ) { Text("Adicionar") }
         },
         dismissButton = {

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -35,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +53,7 @@ import com.lex.app.ui.components.LexTopBar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -66,6 +70,8 @@ fun WebPrintScreen(
     var progress by remember { mutableIntStateOf(0) }
     var showHistory by remember { mutableStateOf(false) }
     var webView by remember { mutableStateOf<WebView?>(null) }
+    var printing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     fun normalizeUrl(raw: String): String {
         val trimmed = raw.trim()
@@ -194,32 +200,52 @@ fun WebPrintScreen(
                             Toast.makeText(context, "Adicione um dispositivo primeiro.", Toast.LENGTH_SHORT).show()
                             return@Button
                         }
-                        PrintController.printWebView(
-                            context,
-                            view,
-                            title.ifBlank { "Página da web" },
-                            state.printSettings
-                        ).onSuccess {
-                            onCreateJob(
-                                title.ifBlank { "Página da web" },
-                                JobKind.WEB,
-                                1,
-                                state.printSettings.color,
-                                state.printSettings.duplex,
-                                "Enviado para ${device.name}"
-                            )
-                        }.onFailure {
-                            Toast.makeText(
+                        if (printing) return@Button
+                        printing = true
+                        scope.launch {
+                            PrintController.printWebView(
                                 context,
-                                it.message ?: "Não foi possível imprimir esta página.",
-                                Toast.LENGTH_LONG
-                            ).show()
+                                view,
+                                device,
+                                title.ifBlank { "Página da web" },
+                                state.printSettings
+                            ).onSuccess {
+                                onCreateJob(
+                                    title.ifBlank { "Página da web" },
+                                    JobKind.WEB,
+                                    1,
+                                    state.printSettings.color,
+                                    state.printSettings.duplex,
+                                    "Enviado para ${device.address}"
+                                )
+                                Toast.makeText(
+                                    context,
+                                    "Página enviada diretamente para ${device.address}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }.onFailure {
+                                Toast.makeText(
+                                    context,
+                                    it.message ?: "Não foi possível imprimir esta página.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            printing = false
                         }
                     },
+                    enabled = !printing,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(Icons.Filled.Print, contentDescription = null)
-                    Text("  Imprimir página")
+                    if (printing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Icon(Icons.Filled.Print, contentDescription = null)
+                        Text("  Imprimir página")
+                    }
                 }
                 TextButton(onClick = { showHistory = true }) { Text("Histórico") }
             }

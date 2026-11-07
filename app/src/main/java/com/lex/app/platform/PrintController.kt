@@ -1,16 +1,11 @@
 package com.lex.app.platform
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.net.Uri
-import android.os.Bundle
-import android.os.CancellationSignal
-import android.os.ParcelFileDescriptor
-import android.print.PageRange
-import android.print.PrintAttributes
-import android.print.PrintDocumentAdapter
-import android.print.PrintDocumentInfo
-import android.print.PrintManager
 import android.webkit.WebView
+import com.lex.app.data.Device
 import com.lex.app.data.PrintSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,72 +17,74 @@ object PrintController {
     suspend fun printUri(
         context: Context,
         uri: Uri,
+        device: Device,
         jobName: String,
         settings: PrintSettings
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            val (pdf, pageCount) = preparePdf(context, uri)
-            withContext(Dispatchers.Main) {
-                val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-                val adapter = PdfFilePrintAdapter(pdf, jobName, pageCount)
-                manager.print(jobName, adapter, attributes(settings))
-                Unit
-            }
-        }
+    ): Result<Unit> = runCatching {
+        val pdf = withContext(Dispatchers.IO) { preparePdf(context, uri) }
+        DirectPrinterClient.sendPdf(device, pdf, jobName, settings).getOrThrow()
     }
 
     suspend fun printUris(
         context: Context,
         uris: List<Uri>,
+        device: Device,
         jobName: String,
         settings: PrintSettings
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            require(uris.isNotEmpty()) { "Selecione pelo menos uma página." }
-            val pdf = PdfUtils.pdfFromUris(context, uris)
-            withContext(Dispatchers.Main) {
-                val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-                val adapter = PdfFilePrintAdapter(pdf, jobName, uris.size)
-                manager.print(jobName, adapter, attributes(settings))
-                Unit
-            }
-        }
+    ): Result<Unit> = runCatching {
+        require(uris.isNotEmpty()) { "Selecione pelo menos uma página." }
+        val pdf = withContext(Dispatchers.IO) { PdfUtils.pdfFromUris(context, uris) }
+        DirectPrinterClient.sendPdf(device, pdf, jobName, settings).getOrThrow()
     }
 
     suspend fun printText(
         context: Context,
         text: String,
-        jobName: String,
-        settings: PrintSettings
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            val (pdf, pages) = PdfUtils.pdfFromText(context, text)
-            withContext(Dispatchers.Main) {
-                val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-                val adapter = PdfFilePrintAdapter(pdf, jobName, pages)
-                manager.print(jobName, adapter, attributes(settings))
-                Unit
-            }
-        }
-    }
-
-    fun printWebView(
-        context: Context,
-        webView: WebView,
+        device: Device,
         jobName: String,
         settings: PrintSettings
     ): Result<Unit> = runCatching {
-        val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-        manager.print(jobName, webView.createPrintDocumentAdapter(jobName), attributes(settings))
+        val pdf = withContext(Dispatchers.IO) { PdfUtils.pdfFromText(context, text).first }
+        DirectPrinterClient.sendPdf(device, pdf, jobName, settings).getOrThrow()
     }
 
-    private fun preparePdf(context: Context, uri: Uri): Pair<File, Int> {
+    @Suppress("DEPRECATION")
+    suspend fun printWebView(
+        context: Context,
+        webView: WebView,
+        device: Device,
+        jobName: String,
+        settings: PrintSettings
+    ): Result<Unit> {
+        val bitmap = withContext(Dispatchers.Main) {
+            val picture = webView.capturePicture()
+                ?: error("A página da web ainda não terminou de carregar.")
+            val width = picture.width.coerceAtLeast(webView.width).coerceAtLeast(1)
+            val height = picture.height
+                .coerceAtLeast(webView.height)
+                .coerceAtLeast(1)
+                .coerceAtMost(20_000)
+            val captured = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(captured)
+            canvas.drawColor(android.graphics.Color.WHITE)
+            picture.draw(canvas)
+            captured
+        }
+        return runCatching {
+            val pdf = withContext(Dispatchers.IO) { PdfUtils.pdfFromBitmap(context, bitmap) }
+            DirectPrinterClient.sendPdf(device, pdf, jobName, settings).getOrThrow()
+        }.also {
+            bitmap.recycle()
+        }
+    }
+
+    private fun preparePdf(context: Context, uri: Uri): File {
         val mime = context.contentResolver.getType(uri).orEmpty()
         val name = PdfUtils.displayName(context, uri).lowercase()
         return when {
             mime.startsWith("image/") || name.endsWith(".png") || name.endsWith(".jpg") ||
                 name.endsWith(".jpeg") || name.endsWith(".webp") -> {
-                PdfUtils.pdfFromUris(context, listOf(uri)) to 1
+                PdfUtils.pdfFromUris(context, listOf(uri))
             }
 
             mime == "application/pdf" || name.endsWith(".pdf") -> {
@@ -95,7 +92,7 @@ object PrintController {
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     FileOutputStream(file).use { output -> input.copyTo(output) }
                 } ?: error("Não foi possível abrir o PDF selecionado.")
-                file to PrintDocumentInfo.PAGE_COUNT_UNKNOWN
+                file
             }
 
             mime.startsWith("text/") || name.endsWith(".txt") || name.endsWith(".csv") ||
@@ -111,90 +108,10 @@ object PrintController {
                     }
                     builder.toString()
                 } ?: error("Não foi possível ler o arquivo selecionado.")
-                PdfUtils.pdfFromText(context, text)
+                PdfUtils.pdfFromText(context, text).first
             }
 
             else -> error("Este tipo de arquivo não é compatível com impressão direta.")
-        }
-    }
-
-    private fun attributes(settings: PrintSettings): PrintAttributes {
-        val media = when (settings.mediaSize.lowercase()) {
-            "letter", "carta" -> PrintAttributes.MediaSize.NA_LETTER
-            "legal", "ofício", "oficio" -> PrintAttributes.MediaSize.NA_LEGAL
-            "a3" -> PrintAttributes.MediaSize.ISO_A3
-            "a5" -> PrintAttributes.MediaSize.ISO_A5
-            "a6" -> PrintAttributes.MediaSize.ISO_A6
-            else -> PrintAttributes.MediaSize.ISO_A4
-        }
-        val oriented = if (settings.orientation.equals("Paisagem", ignoreCase = true) || settings.orientation.equals("Landscape", ignoreCase = true)) {
-            media.asLandscape()
-        } else {
-            media.asPortrait()
-        }
-        return PrintAttributes.Builder()
-            .setMediaSize(oriented)
-            .setColorMode(
-                if (settings.color) PrintAttributes.COLOR_MODE_COLOR
-                else PrintAttributes.COLOR_MODE_MONOCHROME
-            )
-            .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
-            .build()
-    }
-
-    private class PdfFilePrintAdapter(
-        private val file: File,
-        private val jobName: String,
-        private val pageCount: Int
-    ) : PrintDocumentAdapter() {
-
-        override fun onLayout(
-            oldAttributes: PrintAttributes?,
-            newAttributes: PrintAttributes?,
-            cancellationSignal: CancellationSignal?,
-            callback: LayoutResultCallback,
-            extras: Bundle?
-        ) {
-            if (cancellationSignal?.isCanceled == true) {
-                callback.onLayoutCancelled()
-                return
-            }
-            val info = PrintDocumentInfo.Builder(jobName)
-                .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                .setPageCount(if (pageCount > 0) pageCount else PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
-                .build()
-            callback.onLayoutFinished(info, true)
-        }
-
-        override fun onWrite(
-            pages: Array<out PageRange>?,
-            destination: ParcelFileDescriptor?,
-            cancellationSignal: CancellationSignal?,
-            callback: WriteResultCallback
-        ) {
-            if (cancellationSignal?.isCanceled == true) {
-                callback.onWriteCancelled()
-                return
-            }
-            if (destination == null) {
-                callback.onWriteFailed("Nenhum destino foi fornecido.")
-                return
-            }
-            runCatching {
-                java.io.FileInputStream(file).use { input ->
-                    ParcelFileDescriptor.AutoCloseOutputStream(destination).use { output ->
-                        input.copyTo(output)
-                    }
-                }
-            }.onSuccess {
-                callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
-            }.onFailure {
-                callback.onWriteFailed(it.message ?: "Não foi possível gravar o trabalho de impressão.")
-            }
-        }
-
-        override fun onFinish() {
-            file.delete()
         }
     }
 }

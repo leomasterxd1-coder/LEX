@@ -385,11 +385,18 @@ fun AboutScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Produzido por Leo Lopes",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
             Spacer(Modifier.height(20.dp))
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        "O LEX é um aplicativo Jetpack Compose independente inspirado em fluxos de impressão móvel. Ele recria a experiência com código e recursos originais.",
+                        "O LEX é um aplicativo Jetpack Compose independente, idealizado e produzido por Leo Lopes, inspirado em fluxos de impressão móvel. Ele recria a experiência com código e recursos originais.",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(Modifier.height(10.dp))
@@ -432,7 +439,7 @@ fun AboutScreen(
             }
             Spacer(Modifier.height(24.dp))
             Text(
-                "© 2026 Contribuidores do LEX",
+                "© 2026 Leo Lopes",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -451,7 +458,7 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "LEX 1.0.3",
+                "LEX 1.0.4",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -460,7 +467,10 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             Bullet("Geração de PDF e digitalização em segundo plano, com indicadores de progresso.")
             Bullet("APK otimizado com R8: muito menor e com inicialização mais rápida.")
             Bullet("Fundo branco forçado mesmo quando o aparelho está no modo escuro.")
-            Bullet("Imprima arquivos, fotos e páginas da web pelo sistema de impressão do Android.")
+            Bullet("Impressão direta via IP (IPP ou porta 9100), sem a janela nativa do Android.")
+            Bullet("Ícones originais portados para a tela inicial.")
+            Bullet("Correção do retorno para a aba Início.")
+            Bullet("Produzido por Leo Lopes.")
             Bullet("Digitalize com a câmera, o seletor de fotos ou uma página de scanner simulada.")
             Bullet("Descubra impressoras compatíveis com NSD/mDNS e adicione dispositivos manualmente.")
             Bullet("Gerencie, libere e acompanhe trabalhos de impressão, cópia, digitalização e web.")

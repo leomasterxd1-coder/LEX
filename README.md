@@ -1,21 +1,21 @@
 # LEX
 
-LEX is a clean-room, Jetpack Compose reimplementation of a mobile print and scan workflow. It was built from scratch after inspecting the feature surface of the original APK; no original source code, proprietary SDKs, assets or branding are used.
+LEX is an independent Jetpack Compose mobile print and scan app, produced by **Leo Lopes**. The interface follows the layout of the original app, with the source icons ported for visual fidelity and a new red/white theme. No original source code, proprietary SDKs or branding are used.
 
 > LEX is an independent project. It is not affiliated with, endorsed by or sponsored by Lexmark. Lexmark is a trademark of its respective owner.
 
 ## Features
 
-- **Red Material 3 theme** with light and dark color schemes.
+- **White background with a vivid red Material 3 theme** (light theme forced).
 - **Onboarding**: welcome, feature overview, privacy consent and demo device.
-- **Home dashboard**: default device, quick actions, recent jobs.
-- **Print**: PDF, image and text files via the Android print framework, with copies, color, duplex, media size, orientation and page options.
+- **Home (Fontes)**: 3-column source grid, selected-device bar and bottom navigation, using the original source icons.
+- **Print**: PDF, images and text files sent **directly to the printer IP** via IPP (port 631) with a raw port 9100 fallback. Copies, color, sides, media size and orientation are sent as IPP job attributes. No Android print dialog.
 - **Scan**: camera capture, Android photo picker, multi-page scan, simulated scanner page, PDF export to `Downloads/LEX`, and print.
 - **Copy**: capture or pick a page, then print it as a copy.
-- **Web print**: built-in WebView with URL history and page printing.
+- **Web print**: built-in WebView with URL history and direct page printing via the printer IP.
 - **Devices**: NSD/mDNS discovery (`_ipp`, `_ipps`, `_printer`, `_pdl-datastream`, `_scanner`), manual add, demo device, default selection, device details, simulated supplies and help.
 - **Queue**: print, scan, copy and web jobs with release, delete and clear actions.
-- **More**: sources, import devices from JSON, settings, data collection controls, open-source notices, what's new and about.
+- **More**: original-style GERENCIAR/GERAL sections, settings, import, data collection, open-source notices, what's new and about.
 - **Persistence**: devices, jobs, history and settings stored locally with `SharedPreferences` (no account required).
 - **Notifications**: optional completion notification for jobs.
 
@@ -82,9 +82,13 @@ git push origin v1.0.0
 
 ## Limitations
 
-- LEX does not include Lexmark's proprietary cloud, secure-release or device SDKs. Discovery and the Android print dialog work with the platform APIs; secure print and cloud flows are represented as local demo flows.
+- LEX does not include Lexmark's proprietary cloud, secure-release or device SDKs. Discovery uses NSD/mDNS and printing uses standard IPP/raw network protocols. The printer must be reachable on the same network and support PDF/IPP (or raw port 9100). Cloud/secure print flows are represented as local demo flows.
 - The simulated scanner and demo printer are local fixtures for exploring the UI.
 - The app is intentionally free of owner branding, proprietary assets and trackers.
+
+## Author
+
+Produced by **Leo Lopes**.
 
 ## License
 

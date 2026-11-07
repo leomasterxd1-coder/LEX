@@ -102,7 +102,7 @@ fun CopyScreen(
         if (copying) return
         copying = true
         scope.launch {
-            PrintController.printUri(context, uri, "Cópia LEX", state.printSettings)
+            PrintController.printUri(context, uri, device, "Cópia LEX", state.printSettings)
                 .onSuccess {
                     onCreateJob(
                         "Copiar",
@@ -110,9 +110,9 @@ fun CopyScreen(
                         state.printSettings.copies,
                         state.printSettings.color,
                         state.printSettings.duplex,
-                        "Enviado para ${device.name}"
+                        "Enviado para ${device.address}"
                     )
-                    Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Enviado diretamente para ${device.address}", Toast.LENGTH_LONG).show()
                 }
                 .onFailure {
                     Toast.makeText(context, it.message ?: "Não foi possível copiar.", Toast.LENGTH_LONG).show()

@@ -175,6 +175,7 @@ fun ScanScreen(
             PrintController.printUris(
                 context,
                 snapshot,
+                scanner,
                 "Digitalização LEX",
                 printSettings.copy(color = scanSettings.colorMode != "Preto e branco")
             ).onSuccess {
@@ -184,9 +185,9 @@ fun ScanScreen(
                     snapshot.size,
                     scanSettings.colorMode != "Preto e branco",
                     false,
-                    "Enviado para ${scanner.name}"
+                    "Enviado para ${scanner.address}"
                 )
-                Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Enviado diretamente para ${scanner.address}", Toast.LENGTH_LONG).show()
             }.onFailure {
                 Toast.makeText(context, it.message ?: "Não foi possível imprimir.", Toast.LENGTH_LONG).show()
             }
