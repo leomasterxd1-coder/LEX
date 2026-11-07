@@ -68,7 +68,7 @@ fun OnboardingScreen(
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "Print, scan and manage documents from your phone.",
+                    "Imprima, digitalize e gerencie documentos pelo celular.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
                 )
@@ -101,7 +101,7 @@ fun OnboardingScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = { onFinish(false, dataCollection) }) {
-                Text("Skip")
+                Text("Pular")
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 repeat(4) { index ->
@@ -118,9 +118,9 @@ fun OnboardingScreen(
                 }
                 Spacer(Modifier.padding(horizontal = 8.dp))
                 if (step < 3) {
-                    Button(onClick = { step++ }) { Text("Next") }
+                    Button(onClick = { step++ }) { Text("Próximo") }
                 } else {
-                    Button(onClick = { onFinish(true, dataCollection) }) { Text("Get started") }
+                    Button(onClick = { onFinish(true, dataCollection) }) { Text("Começar") }
                 }
             }
         }
@@ -143,20 +143,20 @@ private fun IntroStep() {
             Icon(
                 Icons.Filled.Print,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.size(56.dp)
             )
         }
         Spacer(Modifier.height(24.dp))
         Text(
-            "Welcome to LEX",
+            "Bem-vindo ao LEX",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            "A clean, fast Compose experience for printing and scanning. Add a device or use the demo printer to explore every feature.",
+            "Uma experiência rápida e moderna em Compose para imprimir e digitalizar. Adicione um dispositivo ou use a impressora de demonstração para explorar todos os recursos.",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -168,15 +168,15 @@ private fun IntroStep() {
 private fun FeaturesStep() {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Everything in one place",
+            "Tudo em um só lugar",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
         Spacer(Modifier.height(16.dp))
-        FeatureLine(Icons.Filled.Print, "Print from files, photos and the web")
-        FeatureLine(Icons.Filled.Scanner, "Scan with the camera, photos or a simulated scanner")
-        FeatureLine(Icons.Filled.Wifi, "Discover compatible printers on your network")
-        FeatureLine(Icons.Filled.Cloud, "Queue jobs and manage print release")
+        FeatureLine(Icons.Filled.Print, "Imprima de arquivos, fotos e da web")
+        FeatureLine(Icons.Filled.Scanner, "Digitalize com a câmera, fotos ou um scanner simulado")
+        FeatureLine(Icons.Filled.Wifi, "Descubra impressoras compatíveis na sua rede")
+        FeatureLine(Icons.Filled.Cloud, "Gerencie filas e liberação de impressão")
         Spacer(Modifier.height(20.dp))
         Card(
             colors = CardDefaults.cardColors(
@@ -184,7 +184,7 @@ private fun FeaturesStep() {
             )
         ) {
             Text(
-                "LEX is an independent clean-room project. It is not affiliated with, endorsed by or sponsored by Lexmark.",
+                "O LEX é um projeto independente, criado do zero. Não é afiliado, endossado ou patrocinado pela Lexmark.",
                 modifier = Modifier.padding(16.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -204,14 +204,14 @@ private fun ConsentStep(dataCollection: Boolean, onDataCollection: (Boolean) -> 
             )
             Spacer(Modifier.padding(horizontal = 6.dp))
             Text(
-                "Your privacy",
+                "Sua privacidade",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
         }
         Spacer(Modifier.height(16.dp))
         Text(
-            "LEX stores devices, settings and job history only on this device. No account is required.",
+            "O LEX armazena dispositivos, configurações e histórico de trabalhos apenas neste dispositivo. Não é necessário criar conta.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -222,9 +222,9 @@ private fun ConsentStep(dataCollection: Boolean, onDataCollection: (Boolean) -> 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Share anonymous usage data", fontWeight = FontWeight.SemiBold)
+                    Text("Compartilhar dados de uso anônimos", fontWeight = FontWeight.SemiBold)
                     Text(
-                        "Optional diagnostics help improve LEX. Off by default.",
+                        "Diagnósticos opcionais ajudam a melhorar o LEX. Desativado por padrão.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -234,7 +234,7 @@ private fun ConsentStep(dataCollection: Boolean, onDataCollection: (Boolean) -> 
         }
         Spacer(Modifier.height(16.dp))
         Text(
-            "You can change this later in Settings.",
+            "Você pode alterar isso depois em Configurações.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -245,34 +245,34 @@ private fun ConsentStep(dataCollection: Boolean, onDataCollection: (Boolean) -> 
 private fun AddDeviceStep() {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Add a device",
+            "Adicionar dispositivo",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            "You can add a demo printer now and discover real network printers later.",
+            "Você pode adicionar uma impressora de demonstração agora e descobrir impressoras reais na rede depois.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(24.dp))
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("LEX Demo Printer", fontWeight = FontWeight.SemiBold)
+                Text("Impressora de Demonstração LEX", fontWeight = FontWeight.SemiBold)
                 Text(
-                    "192.168.1.100 · Printer and Scanner",
+                    "192.168.1.100 · Impressora e scanner",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(12.dp))
                 OutlinedButton(onClick = { }) {
-                    Text("It will be added when you tap Get started")
+                    Text("Ela será adicionada quando você tocar em Começar")
                 }
             }
         }
         Spacer(Modifier.height(16.dp))
         Text(
-            "Prefer to start without a device? Tap Skip and add one from the Devices tab.",
+            "Prefere começar sem um dispositivo? Toque em Pular e adicione um na aba Dispositivos.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -293,7 +293,7 @@ private fun FeatureLine(icon: ImageVector, text: String) {
                 .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
         }
         Spacer(Modifier.padding(horizontal = 8.dp))
         Text(text, style = MaterialTheme.typography.bodyLarge)

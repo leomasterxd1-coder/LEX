@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.Button
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -34,7 +36,7 @@ import com.lex.app.ui.components.SectionHeader
 @Composable
 fun QueueScreen(
     state: AppData,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     onReleaseAll: () -> Unit,
     onRelease: (String) -> Unit,
     onDelete: (String) -> Unit,
@@ -48,7 +50,7 @@ fun QueueScreen(
     val failed = state.jobs.count { it.status == JobStatus.FAILED }
 
     Scaffold(
-        topBar = { LexTopBar(title = "Queues", onBack = onBack) }
+        topBar = { LexTopBar(title = "Filas", onBack = onBack) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -71,14 +73,14 @@ fun QueueScreen(
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                "  Job queue",
+                                "  Fila de trabalhos",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                         Text(
-                            "$pending pending · $completed completed · $failed failed",
+                            "$pending pendentes · $completed concluídos · $failed com falha",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -86,14 +88,25 @@ fun QueueScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = onReleaseAll, enabled = pending > 0) {
+                            Button(
+                                onClick = onReleaseAll,
+                                enabled = pending > 0,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
                                 Icon(Icons.Filled.Print, contentDescription = null)
-                                Text("  Release all")
+                                Text("  Liberar tudo")
                             }
                             OutlinedButton(
                                 onClick = onClearFinished,
-                                enabled = completed + failed > 0
-                            ) { Text("Clear finished") }
+                                enabled = completed + failed > 0,
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer)
+                            ) { Text("Limpar concluídos") }
                         }
                     }
                 }
@@ -101,8 +114,8 @@ fun QueueScreen(
 
             item {
                 SectionHeader(
-                    title = "Jobs (${state.jobs.size})",
-                    actionLabel = if (state.devices.isEmpty()) "Add device" else null,
+                    title = "Trabalhos (${state.jobs.size})",
+                    actionLabel = if (state.devices.isEmpty()) "Adicionar dispositivo" else null,
                     onAction = if (state.devices.isEmpty()) onOpenDevices else null
                 )
             }
@@ -111,8 +124,8 @@ fun QueueScreen(
                 item {
                     EmptyState(
                         icon = Icons.Filled.History,
-                        title = "The queue is empty",
-                        message = "Print, copy or scan a document and the job will appear here."
+                        title = "A fila está vazia",
+                        message = "Imprima, copie ou digitalize um documento e o trabalho aparecerá aqui."
                     )
                 }
             } else {
@@ -133,11 +146,11 @@ fun QueueScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            "About job release",
+                            "Sobre a liberação de trabalhos",
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            "In a real secure-print deployment, jobs stay held until you authenticate at the printer. In LEX, Release simulates that flow locally.",
+                            "Em uma implantação real de impressão segura, os trabalhos ficam retidos até você se autenticar na impressora. No LEX, Liberar simula esse fluxo localmente.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

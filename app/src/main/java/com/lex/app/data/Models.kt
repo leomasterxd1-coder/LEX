@@ -3,22 +3,22 @@ package com.lex.app.data
 import java.util.UUID
 
 enum class DeviceType(val label: String) {
-    PRINTER("Printer"),
+    PRINTER("Impressora"),
     SCANNER("Scanner"),
-    MFP("Printer and Scanner")
+    MFP("Impressora e scanner")
 }
 
 enum class DeviceStatus(val label: String) {
-    READY("Ready"),
-    WARNING("Ready but check printer for warnings"),
-    OFFLINE("Offline"),
-    ERROR("Printer Error")
+    READY("Pronto"),
+    WARNING("Pronto, mas verifique os avisos da impressora"),
+    OFFLINE("Desconectado"),
+    ERROR("Erro na impressora")
 }
 
 data class Device(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val model: String = "LEX compatible device",
+    val model: String = "Dispositivo compatível com LEX",
     val address: String = "",
     val type: DeviceType = DeviceType.MFP,
     val status: DeviceStatus = DeviceStatus.READY,
@@ -36,18 +36,18 @@ data class Device(
 }
 
 enum class JobKind(val label: String) {
-    PRINT("Print"),
-    SCAN("Scan"),
-    COPY("Copy"),
+    PRINT("Impressão"),
+    SCAN("Digitalização"),
+    COPY("Cópia"),
     WEB("Web")
 }
 
 enum class JobStatus(val label: String) {
-    QUEUED("Queued"),
-    HELD("Held"),
-    PROCESSING("Processing"),
-    COMPLETED("Completed"),
-    FAILED("Failed")
+    QUEUED("Na fila"),
+    HELD("Retido"),
+    PROCESSING("Processando"),
+    COMPLETED("Concluído"),
+    FAILED("Falhou")
 }
 
 data class PrintJob(
@@ -67,18 +67,18 @@ data class PrintSettings(
     val copies: Int = 1,
     val color: Boolean = false,
     val duplex: Boolean = false,
-    val orientation: String = "Portrait",
+    val orientation: String = "Retrato",
     val mediaSize: String = "A4",
     val allPages: Boolean = true,
     val pageRange: String = ""
 )
 
 data class ScanSettings(
-    val source: String = "Camera",
-    val colorMode: String = "Color",
+    val source: String = "Câmera",
+    val colorMode: String = "Colorido",
     val dpi: Int = 300,
-    val originalSize: String = "Auto Detect",
-    val sides: String = "One-Sided"
+    val originalSize: String = "Detecção automática",
+    val sides: String = "Um lado"
 )
 
 data class WebHistory(
@@ -89,11 +89,11 @@ data class WebHistory(
 )
 
 enum class SourceType(val label: String) {
-    LOCAL("Local Files"),
-    PHOTOS("Photos"),
-    CAMERA("Camera"),
+    LOCAL("Arquivos locais"),
+    PHOTOS("Fotos"),
+    CAMERA("Câmera"),
     WEB("Web"),
-    CLOUD("Cloud")
+    CLOUD("Nuvem")
 }
 
 data class Source(
@@ -122,16 +122,16 @@ data class AppData(
 }
 
 fun defaultSources(): List<Source> = listOf(
-    Source(type = SourceType.LOCAL, name = "Local Files", detail = "Documents and downloads"),
-    Source(type = SourceType.PHOTOS, name = "Photos", detail = "Images on this device"),
-    Source(type = SourceType.CAMERA, name = "Camera", detail = "Capture a new page"),
-    Source(type = SourceType.WEB, name = "Web", detail = "Print a web page"),
-    Source(type = SourceType.CLOUD, name = "Cloud", detail = "Connect a cloud account", enabled = false)
+    Source(type = SourceType.LOCAL, name = "Arquivos locais", detail = "Documentos e arquivos baixados"),
+    Source(type = SourceType.PHOTOS, name = "Fotos", detail = "Imagens neste dispositivo"),
+    Source(type = SourceType.CAMERA, name = "Câmera", detail = "Capturar uma nova página"),
+    Source(type = SourceType.WEB, name = "Web", detail = "Imprimir uma página da web"),
+    Source(type = SourceType.CLOUD, name = "Nuvem", detail = "Conectar uma conta na nuvem", enabled = false)
 )
 
-fun demoDevice(name: String = "LEX Demo Printer", address: String = "192.168.1.100"): Device = Device(
+fun demoDevice(name: String = "Impressora de Demonstração LEX", address: String = "192.168.1.100"): Device = Device(
     name = name,
-    model = "LEX MFP Demo",
+    model = "Multifuncional de Demonstração LEX",
     address = address,
     type = DeviceType.MFP,
     status = DeviceStatus.READY,

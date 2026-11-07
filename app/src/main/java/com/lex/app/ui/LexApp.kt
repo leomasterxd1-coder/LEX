@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Scanner
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -96,7 +96,7 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
         if (granted) {
             viewModel.startDiscovery()
         } else {
-            Toast.makeText(context, "Wi-Fi devices permission is required for discovery.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "A permissão de dispositivos Wi-Fi é necessária para a busca.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -117,11 +117,10 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
     }
 
     val bottomDestinations = listOf(
-        Triple(Routes.HOME, "Home", Icons.Filled.Home),
-        Triple(Routes.PRINT, "Print", Icons.Filled.Print),
-        Triple(Routes.SCAN, "Scan", Icons.Filled.Scanner),
-        Triple(Routes.DEVICES, "Devices", Icons.Filled.Devices),
-        Triple(Routes.MORE, "More", Icons.Filled.MoreHoriz)
+        Triple(Routes.HOME, "Início", Icons.Filled.Home),
+        Triple(Routes.DEVICES, "Localizar", Icons.Filled.Search),
+        Triple(Routes.QUEUE, "Status", Icons.Filled.History),
+        Triple(Routes.MORE, "Mais", Icons.Filled.MoreHoriz)
     )
 
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -174,16 +173,15 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
 
                     composable(Routes.HOME) {
                         HomeScreen(
-                            state = state,
-                            onOpenPrint = { navigateTopLevel(Routes.PRINT) },
-                            onOpenScan = { navigateTopLevel(Routes.SCAN) },
-                            onOpenCopy = { navController.navigate(Routes.COPY) },
-                            onOpenWeb = { navController.navigate(Routes.WEB) },
-                            onOpenDevices = { navigateTopLevel(Routes.DEVICES) },
-                            onOpenQueue = { navController.navigate(Routes.QUEUE) },
-                            onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                            device = state.defaultDevice,
                             onOpenDevice = { id -> navController.navigate(Routes.device(id)) },
-                            onAddDemoDevice = viewModel::addDemoDevice
+                            onFindDevices = { navigateTopLevel(Routes.DEVICES) },
+                            onOpenCamera = { navController.navigate(Routes.SCAN) },
+                            onOpenPhotos = { navController.navigate(Routes.SCAN) },
+                            onOpenFiles = { navController.navigate(Routes.PRINT) },
+                            onOpenWeb = { navController.navigate(Routes.WEB) },
+                            onOpenScanner = { navController.navigate(Routes.SCAN) },
+                            onEditSources = { navController.navigate(Routes.SOURCES) }
                         )
                     }
 
@@ -203,6 +201,7 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
                             },
                             onPrintSettingsChange = viewModel::setPrintSettings,
                             onSelectDevice = viewModel::setDefaultDevice,
+                            onBack = { navController.popBackStack() },
                             onOpenDevices = { navigateTopLevel(Routes.DEVICES) },
                             onOpenWeb = { navController.navigate(Routes.WEB) },
                             onOpenScan = { navigateTopLevel(Routes.SCAN) }
@@ -225,6 +224,7 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
                                 )
                             },
                             onScanSettingsChange = viewModel::setScanSettings,
+                            onBack = { navController.popBackStack() },
                             onOpenDevices = { navigateTopLevel(Routes.DEVICES) }
                         )
                     }
@@ -286,7 +286,7 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
                     composable(Routes.QUEUE) {
                         QueueScreen(
                             state = state,
-                            onBack = { navController.popBackStack() },
+                            onBack = null,
                             onReleaseAll = viewModel::releaseAll,
                             onRelease = viewModel::releaseJob,
                             onDelete = viewModel::deleteJob,
@@ -378,8 +378,8 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
                             onBack = { navController.popBackStack() },
                             onSetDefault = viewModel::setDefaultDevice,
                             onRemove = viewModel::removeDevice,
-                            onOpenPrint = { navigateTopLevel(Routes.PRINT) },
-                            onOpenScan = { navigateTopLevel(Routes.SCAN) }
+                            onOpenPrint = { navController.navigate(Routes.PRINT) },
+                            onOpenScan = { navController.navigate(Routes.SCAN) }
                         )
                     }
                 }

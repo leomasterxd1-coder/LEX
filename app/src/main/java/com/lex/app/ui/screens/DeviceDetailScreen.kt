@@ -59,12 +59,12 @@ fun DeviceDetailScreen(
     Scaffold(
         topBar = {
             LexTopBar(
-                title = device?.name ?: "Device",
+                title = device?.name ?: "Dispositivo",
                 onBack = onBack,
                 actions = {
                     if (device != null) {
                         IconButton(onClick = { showDelete = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Remove device")
+                            Icon(Icons.Filled.Delete, contentDescription = "Remover dispositivo")
                         }
                     }
                 }
@@ -73,8 +73,8 @@ fun DeviceDetailScreen(
     ) { innerPadding ->
         if (device == null) {
             Column(modifier = Modifier.padding(innerPadding).padding(24.dp)) {
-                Text("This device is no longer available.")
-                TextButton(onClick = onBack) { Text("Go back") }
+                Text("Este dispositivo não está mais disponível.")
+                TextButton(onClick = onBack) { Text("Voltar") }
             }
             return@Scaffold
         }
@@ -92,29 +92,29 @@ fun DeviceDetailScreen(
                         StatusBadge(device.status)
                         if (device.isDefault) {
                             Text(
-                                "Default device",
+                                "Dispositivo padrão",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
                     Spacer(Modifier.height(10.dp))
-                    InfoRow("Model", device.model)
-                    InfoRow("Type", device.type.label)
-                    InfoRow("Address", device.address.ifBlank { "Not available" })
-                    InfoRow("Color", if (device.color) "Yes" else "No")
-                    InfoRow("Scanning", if (device.scan) "Yes" else "No")
-                    InfoRow("Web print", if (device.web) "Yes" else "No")
+                    InfoRow("Modelo", device.model)
+                    InfoRow("Tipo", device.type.label)
+                    InfoRow("Endereço", device.address.ifBlank { "Não disponível" })
+                    InfoRow("Cor", if (device.color) "Sim" else "Não")
+                    InfoRow("Digitalização", if (device.scan) "Sim" else "Não")
+                    InfoRow("Impressão web", if (device.web) "Sim" else "Não")
                 }
             }
 
-            SectionHeader(title = "Supplies")
+            SectionHeader(title = "Suprimentos")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    TonerRow("Black", device.blackToner, MaterialTheme.colorScheme.onSurface)
-                    TonerRow("Cyan", device.cyanToner, Color(0xFF00838F))
+                    TonerRow("Preto", device.blackToner, MaterialTheme.colorScheme.onSurface)
+                    TonerRow("Ciano", device.cyanToner, Color(0xFF00838F))
                     TonerRow("Magenta", device.magentaToner, Color(0xFFAD1457))
-                    TonerRow("Yellow", device.yellowToner, Color(0xFFF9A825))
+                    TonerRow("Amarelo", device.yellowToner, Color(0xFFF9A825))
                 }
             }
 
@@ -122,7 +122,7 @@ fun DeviceDetailScreen(
                 Button(onClick = onOpenPrint, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Filled.Print, contentDescription = null)
                     Spacer(Modifier.padding(horizontal = 4.dp))
-                    Text("Print")
+                    Text("Imprimir")
                 }
                 Button(
                     onClick = onOpenScan,
@@ -131,7 +131,7 @@ fun DeviceDetailScreen(
                 ) {
                     Icon(Icons.Filled.Scanner, contentDescription = null)
                     Spacer(Modifier.padding(horizontal = 4.dp))
-                    Text("Scan")
+                    Text("Digitalizar")
                 }
             }
 
@@ -142,7 +142,7 @@ fun DeviceDetailScreen(
                 ) {
                     Icon(Icons.Filled.Star, contentDescription = null)
                     Spacer(Modifier.padding(horizontal = 4.dp))
-                    Text("Set as default")
+                    Text("Definir como padrão")
                 }
             }
 
@@ -152,7 +152,7 @@ fun DeviceDetailScreen(
             ) {
                 Icon(Icons.Filled.Build, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 4.dp))
-                Text("Device help")
+                Text("Ajuda do dispositivo")
             }
         }
     }
@@ -160,8 +160,8 @@ fun DeviceDetailScreen(
     if (showDelete && device != null) {
         AlertDialog(
             onDismissRequest = { showDelete = false },
-            title = { Text("Remove device?") },
-            text = { Text("${device.name} will be removed from LEX. Saved settings stay on this device.") },
+            title = { Text("Remover dispositivo?") },
+            text = { Text("${device.name} será removido do LEX. As configurações salvas permanecem neste dispositivo.") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -169,10 +169,10 @@ fun DeviceDetailScreen(
                         onRemove(device.id)
                         onBack()
                     }
-                ) { Text("Remove") }
+                ) { Text("Remover") }
             },
             dismissButton = {
-                TextButton(onClick = { showDelete = false }) { Text("Cancel") }
+                TextButton(onClick = { showDelete = false }) { Text("Cancelar") }
             }
         )
     }
@@ -180,20 +180,20 @@ fun DeviceDetailScreen(
     if (showHelp) {
         AlertDialog(
             onDismissRequest = { showHelp = false },
-            title = { Text("Device help") },
+            title = { Text("Ajuda do dispositivo") },
             text = {
                 Column {
-                    Text("• Make sure the mobile device and the printer are on the same network.")
+                    Text("• Verifique se o celular e a impressora estão na mesma rede.")
                     Spacer(Modifier.height(8.dp))
-                    Text("• Make sure the printer is awake and in a ready state.")
+                    Text("• Verifique se a impressora está ligada e pronta.")
                     Spacer(Modifier.height(8.dp))
-                    Text("• If discovery fails, add the printer manually using its IP address.")
+                    Text("• Se a descoberta falhar, adicione a impressora manualmente usando o endereço IP.")
                     Spacer(Modifier.height(8.dp))
-                    Text("• Restart Wi-Fi if the printer does not appear.")
+                    Text("• Reinicie o Wi-Fi se a impressora não aparecer.")
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showHelp = false }) { Text("Close") }
+                TextButton(onClick = { showHelp = false }) { Text("Fechar") }
             }
         )
     }

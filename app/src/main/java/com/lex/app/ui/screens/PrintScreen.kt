@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -60,6 +61,7 @@ fun PrintScreen(
     onCreateJob: (String, JobKind, Int, Boolean, Boolean, String) -> Unit,
     onPrintSettingsChange: (PrintSettings) -> Unit,
     onSelectDevice: (String) -> Unit,
+    onBack: () -> Unit,
     onOpenDevices: () -> Unit,
     onOpenWeb: () -> Unit,
     onOpenScan: () -> Unit
@@ -89,7 +91,7 @@ fun PrintScreen(
             selectedUri = uri
             selectedName = PdfUtils.displayName(context, uri)
             selectedMeta = listOf(
-                context.contentResolver.getType(uri) ?: "document",
+                context.contentResolver.getType(uri) ?: "documento",
                 PdfUtils.sizeLabel(context, uri)
             ).filter { it.isNotBlank() }.joinToString(" · ")
         }
@@ -102,7 +104,7 @@ fun PrintScreen(
             selectedUri = uri
             selectedName = PdfUtils.displayName(context, uri)
             selectedMeta = listOf(
-                context.contentResolver.getType(uri) ?: "image",
+                context.contentResolver.getType(uri) ?: "imagem",
                 PdfUtils.sizeLabel(context, uri)
             ).filter { it.isNotBlank() }.joinToString(" · ")
         }
@@ -114,33 +116,33 @@ fun PrintScreen(
     fun performPrint() {
         val uri = selectedUri
         if (uri == null) {
-            Toast.makeText(context, "Choose a file or photo first.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Escolha um arquivo ou foto primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
         if (selectedDevice == null) {
-            Toast.makeText(context, "Add or select a device first.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Adicione ou selecione um dispositivo primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
         if (!selectedDevice.supportsPrint) {
-            Toast.makeText(context, "This device does not support printing.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Este dispositivo não suporta impressão.", Toast.LENGTH_SHORT).show()
             return
         }
-        PrintController.printUri(context, uri, selectedName.ifBlank { "Document" }, printSettings)
+        PrintController.printUri(context, uri, selectedName.ifBlank { "Documento" }, printSettings)
             .onSuccess {
                 onCreateJob(
-                    selectedName.ifBlank { "Document" },
+                    selectedName.ifBlank { "Documento" },
                     JobKind.PRINT,
                     printSettings.copies,
                     printSettings.color,
                     printSettings.duplex,
-                    "Sent to ${selectedDevice.name}"
+                    "Enviado para ${selectedDevice.name}"
                 )
-                Toast.makeText(context, "Opening Android print dialog…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
             }
             .onFailure {
                 Toast.makeText(
                     context,
-                    it.message ?: "Could not start the print job.",
+                    it.message ?: "Não foi possível iniciar a impressão.",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -148,7 +150,7 @@ fun PrintScreen(
 
     Scaffold(
         topBar = {
-            LexTopBar(title = "Print")
+            LexTopBar(title = "Imprimir", onBack = onBack)
         }
     ) { innerPadding ->
         Column(
@@ -159,7 +161,7 @@ fun PrintScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            SectionHeader(title = "Printer")
+            SectionHeader(title = "Impressora")
             if (state.devices.isEmpty()) {
                 Card(
                     colors = CardDefaults.cardColors(
@@ -174,26 +176,32 @@ fun PrintScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "No devices yet",
+                                "Nenhum dispositivo ainda",
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                "Discover a printer or add the demo device.",
+                                "Descubra uma impressora ou adicione o dispositivo de demonstração.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
-                        Button(onClick = onOpenDevices) {
+                        Button(
+                            onClick = onOpenDevices,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
                             Icon(Icons.Filled.Add, contentDescription = null)
                             Spacer(Modifier.padding(horizontal = 4.dp))
-                            Text("Add")
+                            Text("Adicionar")
                         }
                     }
                 }
             } else {
                 DropdownChoice(
-                    label = "Selected device",
+                    label = "Dispositivo selecionado",
                     options = state.devices.map { it.name },
                     selected = selectedDevice?.name ?: state.devices.first().name,
                     onSelected = { name ->
@@ -212,7 +220,7 @@ fun PrintScreen(
                 }
             }
 
-            SectionHeader(title = "Document")
+            SectionHeader(title = "Documento")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -224,13 +232,13 @@ fun PrintScreen(
                         Spacer(Modifier.padding(horizontal = 6.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                selectedName.ifBlank { "No file selected" },
+                                selectedName.ifBlank { "Nenhum arquivo selecionado" },
                                 fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
                                 selectedMeta.ifBlank {
-                                    "PDF, images and text files are supported."
+                                    "PDF, imagens e arquivos de texto são suportados."
                                 },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -243,7 +251,7 @@ fun PrintScreen(
                             onClick = {
                                 filePicker.launch(arrayOf("application/pdf", "image/*", "text/*"))
                             }
-                        ) { Text("Choose file") }
+                        ) { Text("Escolher arquivo") }
                         OutlinedButton(
                             onClick = {
                                 photoPicker.launch(
@@ -255,27 +263,27 @@ fun PrintScreen(
                         ) {
                             Icon(Icons.Filled.PhotoCamera, contentDescription = null)
                             Spacer(Modifier.padding(horizontal = 4.dp))
-                            Text("Photo")
+                            Text("Foto")
                         }
                     }
                 }
             }
 
             SectionHeader(
-                title = "Print settings",
-                actionLabel = "Change",
+                title = "Configurações de impressão",
+                actionLabel = "Alterar",
                 onAction = { showSettingsDialog = true }
             )
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    InfoRow("Copies", printSettings.copies.toString())
-                    InfoRow("Color", if (printSettings.color) "Color" else "Black and White")
-                    InfoRow("Sides", if (printSettings.duplex) "Two-Sided" else "One-Sided")
-                    InfoRow("Media size", printSettings.mediaSize)
-                    InfoRow("Orientation", printSettings.orientation)
+                    InfoRow("Cópias", printSettings.copies.toString())
+                    InfoRow("Cor", if (printSettings.color) "Colorido" else "Preto e branco")
+                    InfoRow("Lados", if (printSettings.duplex) "Frente e verso" else "Um lado")
+                    InfoRow("Tamanho do papel", printSettings.mediaSize)
+                    InfoRow("Orientação", printSettings.orientation)
                     InfoRow(
-                        "Pages",
-                        if (printSettings.allPages) "All pages" else printSettings.pageRange.ifBlank { "Custom" }
+                        "Páginas",
+                        if (printSettings.allPages) "Todas as páginas" else printSettings.pageRange.ifBlank { "Personalizado" }
                     )
                 }
             }
@@ -288,18 +296,18 @@ fun PrintScreen(
             ) {
                 Icon(Icons.Filled.Print, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 6.dp))
-                Text("Print")
+                Text("Imprimir")
             }
 
-            SectionHeader(title = "More ways to print")
+            SectionHeader(title = "Mais formas de imprimir")
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedButton(onClick = onOpenWeb, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Filled.Language, contentDescription = null)
                     Spacer(Modifier.padding(horizontal = 4.dp))
-                    Text("Web page")
+                    Text("Página da web")
                 }
                 OutlinedButton(onClick = onOpenScan, modifier = Modifier.weight(1f)) {
-                    Text("Scan first")
+                    Text("Digitalizar primeiro")
                 }
             }
         }
@@ -309,7 +317,7 @@ fun PrintScreen(
         var draft by remember(printSettings) { mutableStateOf(printSettings) }
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { showSettingsDialog = false },
-            title = { Text("Print settings", fontWeight = FontWeight.SemiBold) },
+            title = { Text("Configurações de impressão", fontWeight = FontWeight.SemiBold) },
             text = {
                 Column(
                     modifier = Modifier
@@ -317,38 +325,38 @@ fun PrintScreen(
                         .verticalScroll(rememberScrollState())
                 ) {
                     StepperRow(
-                        label = "Copies",
+                        label = "Cópias",
                         value = draft.copies,
                         onChange = { draft = draft.copy(copies = it) }
                     )
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     SwitchRow(
-                        title = "Color",
-                        subtitle = "Off prints in black and white",
+                        title = "Cor",
+                        subtitle = "Desativado imprime em preto e branco",
                         checked = draft.color,
                         onCheckedChange = { draft = draft.copy(color = it) }
                     )
                     SwitchRow(
-                        title = "Two-sided",
-                        subtitle = "Duplex when supported by the device",
+                        title = "Frente e verso",
+                        subtitle = "Frente e verso quando compatível com o dispositivo",
                         checked = draft.duplex,
                         onCheckedChange = { draft = draft.copy(duplex = it) }
                     )
                     DropdownChoice(
-                        label = "Media size",
-                        options = listOf("A4", "Letter", "Legal", "A3", "A5", "A6"),
+                        label = "Tamanho do papel",
+                        options = listOf("A4", "Carta", "Ofício", "A3", "A5", "A6"),
                         selected = draft.mediaSize,
                         onSelected = { draft = draft.copy(mediaSize = it) }
                     )
                     DropdownChoice(
-                        label = "Orientation",
-                        options = listOf("Portrait", "Landscape"),
+                        label = "Orientação",
+                        options = listOf("Retrato", "Paisagem"),
                         selected = draft.orientation,
                         onSelected = { draft = draft.copy(orientation = it) }
                     )
                     SwitchRow(
-                        title = "All pages",
-                        subtitle = "Turn off to set a page range",
+                        title = "Todas as páginas",
+                        subtitle = "Desative para definir um intervalo de páginas",
                         checked = draft.allPages,
                         onCheckedChange = { draft = draft.copy(allPages = it) }
                     )
@@ -356,8 +364,8 @@ fun PrintScreen(
                         androidx.compose.material3.OutlinedTextField(
                             value = draft.pageRange,
                             onValueChange = { draft = draft.copy(pageRange = it) },
-                            label = { Text("Page range") },
-                            placeholder = { Text("e.g. 1-3, 5") },
+                            label = { Text("Intervalo de páginas") },
+                            placeholder = { Text("ex.: 1-3, 5") },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -369,10 +377,10 @@ fun PrintScreen(
                         onPrintSettingsChange(draft)
                         showSettingsDialog = false
                     }
-                ) { Text("Done") }
+                ) { Text("Concluído") }
             },
             dismissButton = {
-                TextButton(onClick = { showSettingsDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showSettingsDialog = false }) { Text("Cancelar") }
             }
         )
     }

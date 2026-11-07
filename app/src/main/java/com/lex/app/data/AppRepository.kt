@@ -120,7 +120,7 @@ class AppRepository(context: Context) {
             webHistory = json.optJSONArray("webHistory").mapObjects(::historyFromJson),
             printSettings = json.optJSONObject("printSettings")?.let(::printSettingsFromJson) ?: PrintSettings(),
             scanSettings = json.optJSONObject("scanSettings")?.let(::scanSettingsFromJson) ?: ScanSettings(),
-            sources = json.optJSONArray("sources").mapObjects(::sourceFromJson).ifEmpty { defaultSources() }
+            sources = normalizeSources(json.optJSONArray("sources").mapObjects(::sourceFromJson))
         )
 
         fun deviceToJson(device: Device) = JSONObject().apply {
@@ -142,8 +142,8 @@ class AppRepository(context: Context) {
 
         fun deviceFromJson(json: JSONObject) = Device(
             id = json.optString("id").ifBlank { java.util.UUID.randomUUID().toString() },
-            name = json.optString("name", "Printer"),
-            model = json.optString("model", "LEX compatible device"),
+            name = json.optString("name", "Impressora"),
+            model = json.optString("model", "Dispositivo compatível com LEX"),
             address = json.optString("address"),
             type = enumOrDefault(json.optString("type"), DeviceType.MFP),
             status = enumOrDefault(json.optString("status"), DeviceStatus.READY),
@@ -172,9 +172,9 @@ class AppRepository(context: Context) {
 
         fun jobFromJson(json: JSONObject) = PrintJob(
             id = json.optString("id").ifBlank { java.util.UUID.randomUUID().toString() },
-            name = json.optString("name", "Job"),
+            name = json.optString("name", "Trabalho"),
             kind = enumOrDefault(json.optString("kind"), JobKind.PRINT),
-            deviceName = json.optString("deviceName", "Printer"),
+            deviceName = json.optString("deviceName", "Impressora"),
             status = enumOrDefault(json.optString("status"), JobStatus.QUEUED),
             createdAt = json.optLong("createdAt", System.currentTimeMillis()),
             pages = json.optInt("pages", 1),
@@ -211,8 +211,8 @@ class AppRepository(context: Context) {
             copies = json.optInt("copies", 1).coerceIn(1, 999),
             color = json.optBoolean("color", false),
             duplex = json.optBoolean("duplex", false),
-            orientation = json.optString("orientation", "Portrait"),
-            mediaSize = json.optString("mediaSize", "A4"),
+            orientation = ptOrientation(json.optString("orientation", "Retrato")),
+            mediaSize = ptMedia(json.optString("mediaSize", "A4")),
             allPages = json.optBoolean("allPages", true),
             pageRange = json.optString("pageRange")
         )
@@ -226,11 +226,11 @@ class AppRepository(context: Context) {
         }
 
         fun scanSettingsFromJson(json: JSONObject) = ScanSettings(
-            source = json.optString("source", "Camera"),
-            colorMode = json.optString("colorMode", "Color"),
+            source = ptSource(json.optString("source", "Câmera")),
+            colorMode = ptColorMode(json.optString("colorMode", "Colorido")),
             dpi = json.optInt("dpi", 300),
-            originalSize = json.optString("originalSize", "Auto Detect"),
-            sides = json.optString("sides", "One-Sided")
+            originalSize = ptOriginalSize(json.optString("originalSize", "Detecção automática")),
+            sides = ptSides(json.optString("sides", "Um lado"))
         )
 
         fun sourceToJson(source: Source) = JSONObject().apply {
@@ -244,10 +244,53 @@ class AppRepository(context: Context) {
         fun sourceFromJson(json: JSONObject) = Source(
             id = json.optString("id").ifBlank { java.util.UUID.randomUUID().toString() },
             type = enumOrDefault(json.optString("type"), SourceType.LOCAL),
-            name = json.optString("name", "Source"),
+            name = json.optString("name", "Fonte"),
             detail = json.optString("detail"),
             enabled = json.optBoolean("enabled", true)
         )
+
+        fun normalizeSources(loaded: List<Source>): List<Source> {
+            if (loaded.isEmpty()) return defaultSources()
+            return defaultSources().map { def ->
+                loaded.firstOrNull { it.type == def.type }?.copy(name = def.name, detail = def.detail) ?: def
+            }
+        }
+
+        fun ptOrientation(raw: String): String = when (raw) {
+            "Portrait", "Retrato" -> "Retrato"
+            "Landscape", "Paisagem" -> "Paisagem"
+            else -> raw
+        }
+
+        fun ptMedia(raw: String): String = when (raw) {
+            "Letter", "Carta" -> "Carta"
+            "Legal", "Ofício", "Oficio" -> "Ofício"
+            else -> raw
+        }
+
+        fun ptColorMode(raw: String): String = when (raw) {
+            "Color", "Colorido" -> "Colorido"
+            "Black and White", "Preto e branco" -> "Preto e branco"
+            "Grayscale", "Escala de cinza" -> "Escala de cinza"
+            else -> raw
+        }
+
+        fun ptSource(raw: String): String = when (raw) {
+            "Camera", "Câmera" -> "Câmera"
+            else -> raw
+        }
+
+        fun ptOriginalSize(raw: String): String = when (raw) {
+            "Auto Detect", "Detecção automática" -> "Detecção automática"
+            else -> raw
+        }
+
+        fun ptSides(raw: String): String = when (raw) {
+            "One-Sided", "Um lado" -> "Um lado"
+            "Two-Sided (Long Edge)", "Frente e verso (borda longa)" -> "Frente e verso (borda longa)"
+            "Two-Sided (Short Edge)", "Frente e verso (borda curta)" -> "Frente e verso (borda curta)"
+            else -> raw
+        }
 
         inline fun <reified T : Enum<T>> enumOrDefault(raw: String, fallback: T): T =
             runCatching { enumValueOf<T>(raw) }.getOrDefault(fallback)

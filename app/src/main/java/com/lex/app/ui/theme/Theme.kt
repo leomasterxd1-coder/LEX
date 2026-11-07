@@ -5,16 +5,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
     primary = LexRed,
     onPrimary = LexWarmWhite,
     primaryContainer = LexRedContainer,
-    onPrimaryContainer = LexRedDeep,
+    onPrimaryContainer = LexWarmWhite,
     secondary = LexRedDark,
     onSecondary = LexWarmWhite,
     secondaryContainer = LexRedContainer,
-    onSecondaryContainer = LexRedDeep,
+    onSecondaryContainer = LexWarmWhite,
     tertiary = LexRedDark,
     onTertiary = LexWarmWhite,
     background = LexWarmWhite,
@@ -30,15 +31,15 @@ private val LightColors = lightColorScheme(
 
 private val DarkColors = darkColorScheme(
     primary = ColorPrimaryDark,
-    onPrimary = LexRedDeep,
+    onPrimary = Color(0xFF1A0000),
     primaryContainer = LexRedContainerDark,
-    onPrimaryContainer = LexRedContainer,
+    onPrimaryContainer = LexWarmWhite,
     secondary = ColorSecondaryDark,
-    onSecondary = LexRedDeep,
+    onSecondary = Color(0xFF1A0000),
     secondaryContainer = LexRedContainerDark,
-    onSecondaryContainer = LexRedContainer,
+    onSecondaryContainer = LexWarmWhite,
     tertiary = ColorSecondaryDark,
-    onTertiary = LexRedDeep,
+    onTertiary = Color(0xFF1A0000),
     background = LexDarkBackground,
     onBackground = LexDarkOnSurface,
     surface = LexDarkSurface,
@@ -47,7 +48,7 @@ private val DarkColors = darkColorScheme(
     onSurfaceVariant = LexDarkOnSurfaceVariant,
     outline = ColorOutlineDark,
     error = ColorErrorDark,
-    onError = LexRedDeep
+    onError = Color(0xFF1A0000)
 )
 
 @Composable

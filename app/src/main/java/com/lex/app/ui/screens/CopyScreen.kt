@@ -81,37 +81,37 @@ fun CopyScreen(
         val uri = ScanUtils.newCaptureUri(context)
         pendingCameraUri = uri
         runCatching { camera.launch(uri) }.onFailure {
-            Toast.makeText(context, "No camera app available.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Nenhum aplicativo de câmera disponível.", Toast.LENGTH_SHORT).show()
         }
     }
 
     fun copy() {
         val uri = page ?: run {
-            Toast.makeText(context, "Choose or capture a page first.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Escolha ou capture uma página primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
         val device = state.defaultDevice ?: run {
-            Toast.makeText(context, "Add a device first.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Adicione um dispositivo primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
-        PrintController.printUri(context, uri, "LEX Copy", state.printSettings)
+        PrintController.printUri(context, uri, "Cópia LEX", state.printSettings)
             .onSuccess {
                 onCreateJob(
-                    "Copy",
+                    "Copiar",
                     JobKind.COPY,
                     state.printSettings.copies,
                     state.printSettings.color,
                     state.printSettings.duplex,
-                    "Sent to ${device.name}"
+                    "Enviado para ${device.name}"
                 )
-                Toast.makeText(context, "Opening Android print dialog…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
             }
             .onFailure {
-                Toast.makeText(context, it.message ?: "Could not copy.", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, it.message ?: "Não foi possível copiar.", Toast.LENGTH_LONG).show()
             }
     }
 
-    Scaffold(topBar = { LexTopBar(title = "Copy", onBack = onBack) }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Copiar", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -119,7 +119,7 @@ fun CopyScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            SectionHeader(title = "Place the original")
+            SectionHeader(title = "Coloque o original")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(
                     modifier = Modifier
@@ -149,7 +149,7 @@ fun CopyScreen(
                         OutlinedButton(onClick = ::capture) {
                             Icon(Icons.Filled.PhotoCamera, contentDescription = null)
                             Spacer(Modifier.padding(horizontal = 4.dp))
-                            Text("Camera")
+                            Text("Câmera")
                         }
                         OutlinedButton(
                             onClick = {
@@ -160,22 +160,22 @@ fun CopyScreen(
                         ) {
                             Icon(Icons.Filled.PhotoLibrary, contentDescription = null)
                             Spacer(Modifier.padding(horizontal = 4.dp))
-                            Text("Photos")
+                            Text("Fotos")
                         }
                     }
                 }
             }
 
-            SectionHeader(title = "Copy settings")
+            SectionHeader(title = "Configurações de cópia")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    InfoRow("Copies", state.printSettings.copies.toString())
-                    InfoRow("Color", if (state.printSettings.color) "Color" else "Black and White")
+                    InfoRow("Cópias", state.printSettings.copies.toString())
+                    InfoRow("Cor", if (state.printSettings.color) "Colorido" else "Preto e branco")
                     InfoRow(
-                        "Sides",
-                        if (state.printSettings.duplex) "Two-Sided" else "One-Sided"
+                        "Lados",
+                        if (state.printSettings.duplex) "Frente e verso" else "Um lado"
                     )
-                    InfoRow("Media size", state.printSettings.mediaSize)
+                    InfoRow("Tamanho do papel", state.printSettings.mediaSize)
                 }
             }
 
@@ -187,7 +187,7 @@ fun CopyScreen(
             ) {
                 Icon(Icons.Filled.ContentCopy, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 6.dp))
-                Text("Copy")
+                Text("Copiar")
             }
         }
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LEX</string>
-    <string name="notif_channel_jobs">Print jobs</string>
-    <string name="notif_channel_jobs_desc">Updates about print and scan jobs</string>
+    <string name="notif_channel_jobs">Trabalhos de impressão</string>
+    <string name="notif_channel_jobs_desc">Atualizações sobre trabalhos de impressão e digitalização</string>
 </resources>

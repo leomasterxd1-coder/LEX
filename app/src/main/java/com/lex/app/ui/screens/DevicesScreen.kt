@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -64,10 +66,10 @@ fun DevicesScreen(
     Scaffold(
         topBar = {
             LexTopBar(
-                title = "Devices",
+                title = "Dispositivos",
                 actions = {
                     TextButton(onClick = { showAddDialog = true }) {
-                        Text("Add", color = MaterialTheme.colorScheme.onPrimary)
+                        Text("Adicionar", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             )
@@ -94,7 +96,7 @@ fun DevicesScreen(
                         )
                         Spacer(Modifier.padding(horizontal = 6.dp))
                         Text(
-                            "Find devices",
+                            "Buscar dispositivos",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -102,7 +104,7 @@ fun DevicesScreen(
                     }
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        discoveryStatus ?: "Discover compatible printers on your Wi-Fi network.",
+                        discoveryStatus ?: "Descubra impressoras compatíveis na sua rede Wi-Fi.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -113,16 +115,26 @@ fun DevicesScreen(
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(
-                            onClick = if (discovering) onStopDiscovery else onStartDiscovery
+                            onClick = if (discovering) onStopDiscovery else onStartDiscovery,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
                         ) {
                             Icon(
                                 if (discovering) Icons.Filled.Refresh else Icons.Filled.Wifi,
                                 contentDescription = null
                             )
                             Spacer(Modifier.padding(horizontal = 4.dp))
-                            Text(if (discovering) "Stop" else "Find devices")
+                            Text(if (discovering) "Parar" else "Buscar dispositivos")
                         }
-                        OutlinedButton(onClick = { showAddDialog = true }) {
+                        OutlinedButton(
+                            onClick = { showAddDialog = true },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer)
+                        ) {
                             Icon(Icons.Filled.Add, contentDescription = null)
                             Spacer(Modifier.padding(horizontal = 4.dp))
                             Text("Manual")
@@ -132,7 +144,7 @@ fun DevicesScreen(
             }
 
             if (discovered.isNotEmpty()) {
-                SectionHeader(title = "Discovered (${discovered.size})")
+                SectionHeader(title = "Encontrados (${discovered.size})")
                 discovered.forEach { device ->
                     Card(
                         colors = CardDefaults.cardColors(
@@ -154,23 +166,23 @@ fun DevicesScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            Button(onClick = { onAddDevice(device) }) { Text("Add") }
+                            Button(onClick = { onAddDevice(device) }) { Text("Adicionar") }
                         }
                     }
                 }
             }
 
             SectionHeader(
-                title = "Saved devices (${state.devices.size})",
-                actionLabel = "Queue",
+                title = "Dispositivos salvos (${state.devices.size})",
+                actionLabel = "Fila",
                 onAction = onOpenQueue
             )
             if (state.devices.isEmpty()) {
                 EmptyState(
                     icon = Icons.Filled.Print,
-                    title = "No saved devices",
-                    message = "Find a printer on your network, add one manually, or try the demo device.",
-                    actionLabel = "Add demo device",
+                    title = "Nenhum dispositivo salvo",
+                    message = "Encontre uma impressora na rede, adicione manualmente ou use o dispositivo de demonstração.",
+                    actionLabel = "Adicionar dispositivo de demonstração",
                     onAction = onAddDemoDevice
                 )
             } else {
@@ -216,7 +228,7 @@ private fun AddDeviceDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add device") },
+        title = { Text("Adicionar dispositivo") },
         text = {
             Column(
                 modifier = Modifier
@@ -226,37 +238,37 @@ private fun AddDeviceDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text("Nome") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = address,
                     onValueChange = { address = it },
-                    label = { Text("IP address or hostname") },
+                    label = { Text("Endereço IP ou nome do host") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 DropdownChoice(
-                    label = "Type",
+                    label = "Tipo",
                     options = DeviceType.entries.map { it.label },
                     selected = typeText,
                     onSelected = { typeText = it }
                 )
                 SwitchRow(
-                    title = "Color printing",
-                    subtitle = "Supports color documents",
+                    title = "Impressão colorida",
+                    subtitle = "Suporta documentos coloridos",
                     checked = color,
                     onCheckedChange = { color = it }
                 )
                 SwitchRow(
-                    title = "Scanning",
-                    subtitle = "Exposes a scanner",
+                    title = "Digitalização",
+                    subtitle = "Expõe um scanner",
                     checked = scan,
                     onCheckedChange = { scan = it }
                 )
                 SwitchRow(
-                    title = "Web print",
-                    subtitle = "Accepts web documents",
+                    title = "Impressão web",
+                    subtitle = "Aceita documentos da web",
                     checked = web,
                     onCheckedChange = { web = it }
                 )
@@ -267,7 +279,7 @@ private fun AddDeviceDialog(
                 onClick = {
                     onAdd(
                         Device(
-                            name = name.ifBlank { "Manual device" },
+                            name = name.ifBlank { "Dispositivo manual" },
                             address = address,
                             type = type,
                             color = color,
@@ -276,10 +288,10 @@ private fun AddDeviceDialog(
                         )
                     )
                 }
-            ) { Text("Add") }
+            ) { Text("Adicionar") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

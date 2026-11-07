@@ -62,7 +62,7 @@ fun WebPrintScreen(
 ) {
     val context = LocalContext.current
     var address by remember { mutableStateOf("https://www.example.com") }
-    var title by remember { mutableStateOf("Web print") }
+    var title by remember { mutableStateOf("Impressão web") }
     var progress by remember { mutableIntStateOf(0) }
     var showHistory by remember { mutableStateOf(false) }
     var webView by remember { mutableStateOf<WebView?>(null) }
@@ -89,11 +89,11 @@ fun WebPrintScreen(
     Scaffold(
         topBar = {
             LexTopBar(
-                title = "Web print",
+                title = "Impressão web",
                 onBack = onBack,
                 actions = {
                     IconButton(onClick = { showHistory = true }) {
-                        Icon(Icons.Filled.History, contentDescription = "History")
+                        Icon(Icons.Filled.History, contentDescription = "Histórico")
                     }
                 }
             )
@@ -115,7 +115,7 @@ fun WebPrintScreen(
                     onValueChange = { address = it },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
-                    label = { Text("Address") },
+                    label = { Text("Endereço") },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Uri,
                         imeAction = ImeAction.Go
@@ -126,9 +126,9 @@ fun WebPrintScreen(
                     val current = webView ?: return@IconButton
                     if (current.canGoBack()) current.goBack() else current.reload()
                 }) {
-                    Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
+                    Icon(Icons.Filled.Refresh, contentDescription = "Atualizar")
                 }
-                Button(onClick = { load(address) }) { Text("Go") }
+                Button(onClick = { load(address) }) { Text("Ir") }
             }
 
             if (progress in 1..99) {
@@ -186,32 +186,32 @@ fun WebPrintScreen(
                     onClick = {
                         val view = webView
                         if (view == null) {
-                            Toast.makeText(context, "Nothing to print yet.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Nada para imprimir ainda.", Toast.LENGTH_SHORT).show()
                             return@Button
                         }
                         val device = state.defaultDevice
                         if (device == null) {
-                            Toast.makeText(context, "Add a device first.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Adicione um dispositivo primeiro.", Toast.LENGTH_SHORT).show()
                             return@Button
                         }
                         PrintController.printWebView(
                             context,
                             view,
-                            title.ifBlank { "Web page" },
+                            title.ifBlank { "Página da web" },
                             state.printSettings
                         ).onSuccess {
                             onCreateJob(
-                                title.ifBlank { "Web page" },
+                                title.ifBlank { "Página da web" },
                                 JobKind.WEB,
                                 1,
                                 state.printSettings.color,
                                 state.printSettings.duplex,
-                                "Sent to ${device.name}"
+                                "Enviado para ${device.name}"
                             )
                         }.onFailure {
                             Toast.makeText(
                                 context,
-                                it.message ?: "Could not print this page.",
+                                it.message ?: "Não foi possível imprimir esta página.",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -219,9 +219,9 @@ fun WebPrintScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Filled.Print, contentDescription = null)
-                    Text("  Print page")
+                    Text("  Imprimir página")
                 }
-                TextButton(onClick = { showHistory = true }) { Text("History") }
+                TextButton(onClick = { showHistory = true }) { Text("Histórico") }
             }
         }
     }
@@ -229,11 +229,11 @@ fun WebPrintScreen(
     if (showHistory) {
         AlertDialog(
             onDismissRequest = { showHistory = false },
-            title = { Text("Web history") },
+            title = { Text("Histórico da web") },
             text = {
                 Column {
                     if (state.webHistory.isEmpty()) {
-                        Text("No pages visited yet.")
+                        Text("Nenhuma página visitada ainda.")
                     } else {
                         state.webHistory.take(10).forEach { entry ->
                             TextButton(
@@ -267,7 +267,7 @@ fun WebPrintScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showHistory = false }) { Text("Close") }
+                TextButton(onClick = { showHistory = false }) { Text("Fechar") }
             },
             dismissButton = {
                 if (state.webHistory.isNotEmpty()) {
@@ -276,7 +276,7 @@ fun WebPrintScreen(
                             onClearHistory()
                             showHistory = false
                         }
-                    ) { Text("Clear") }
+                    ) { Text("Limpar") }
                 }
             }
         )

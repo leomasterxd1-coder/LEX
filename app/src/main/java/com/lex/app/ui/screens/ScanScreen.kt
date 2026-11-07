@@ -72,6 +72,7 @@ fun ScanScreen(
     scanSettings: ScanSettings,
     onCreateJob: (String, JobKind, Int, Boolean, Boolean, String) -> Unit,
     onScanSettingsChange: (ScanSettings) -> Unit,
+    onBack: () -> Unit,
     onOpenDevices: () -> Unit
 ) {
     val context = LocalContext.current
@@ -84,7 +85,7 @@ fun ScanScreen(
         if (success) {
             pendingCameraUri?.let { pages = pages + it }
         } else {
-            Toast.makeText(context, "The photo was not captured.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "A foto não foi capturada.", Toast.LENGTH_SHORT).show()
         }
         pendingCameraUri = null
     }
@@ -99,7 +100,7 @@ fun ScanScreen(
         val uri = ScanUtils.newCaptureUri(context)
         pendingCameraUri = uri
         runCatching { camera.launch(uri) }.onFailure {
-            Toast.makeText(context, "No camera app is available.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Nenhum aplicativo de câmera disponível.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -112,7 +113,7 @@ fun ScanScreen(
 
     fun savePdf() {
         if (pages.isEmpty()) {
-            Toast.makeText(context, "Add at least one page first.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Adicione pelo menos uma página primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
         runCatching {
@@ -122,53 +123,53 @@ fun ScanScreen(
         }.onSuccess { uri ->
             if (uri != null) {
                 onCreateJob(
-                    "Scan ${pages.size} page(s)",
+                    "Digitalização de ${pages.size} página(s)",
                     JobKind.SCAN,
                     pages.size,
-                    scanSettings.colorMode != "Black and White",
+                    scanSettings.colorMode != "Preto e branco",
                     false,
-                    "Saved to Downloads/LEX"
+                    "Salvo em Downloads/LEX"
                 )
-                Toast.makeText(context, "Saved to Downloads/LEX", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Salvo em Downloads/LEX", Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(context, "Could not save the PDF.", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Não foi possível salvar o PDF.", Toast.LENGTH_LONG).show()
             }
         }.onFailure {
-            Toast.makeText(context, it.message ?: "Could not create the PDF.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, it.message ?: "Não foi possível criar o PDF.", Toast.LENGTH_LONG).show()
         }
     }
 
     fun printPages() {
         if (pages.isEmpty()) {
-            Toast.makeText(context, "Add at least one page first.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Adicione pelo menos uma página primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
         if (scanner == null) {
-            Toast.makeText(context, "Add a device before printing.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Adicione um dispositivo antes de imprimir.", Toast.LENGTH_SHORT).show()
             return
         }
         PrintController.printUris(
             context,
             pages,
-            "LEX Scan",
-            printSettings.copy(color = scanSettings.colorMode != "Black and White")
+            "Digitalização LEX",
+            printSettings.copy(color = scanSettings.colorMode != "Preto e branco")
         ).onSuccess {
             onCreateJob(
-                "Scan ${pages.size} page(s)",
+                "Digitalização de ${pages.size} página(s)",
                 JobKind.SCAN,
                 pages.size,
-                scanSettings.colorMode != "Black and White",
+                scanSettings.colorMode != "Preto e branco",
                 false,
-                "Sent to ${scanner.name}"
+                "Enviado para ${scanner.name}"
             )
-            Toast.makeText(context, "Opening Android print dialog…", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
         }.onFailure {
-            Toast.makeText(context, it.message ?: "Could not print.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, it.message ?: "Não foi possível imprimir.", Toast.LENGTH_LONG).show()
         }
     }
 
     Scaffold(
-        topBar = { LexTopBar(title = "Scan") }
+        topBar = { LexTopBar(title = "Digitalizar", onBack = onBack) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -180,7 +181,7 @@ fun ScanScreen(
         ) {
             SectionHeader(
                 title = "Scanner",
-                actionLabel = if (state.devices.isEmpty()) "Add device" else null,
+                actionLabel = if (state.devices.isEmpty()) "Adicionar dispositivo" else null,
                 onAction = if (state.devices.isEmpty()) onOpenDevices else null
             )
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
@@ -199,14 +200,14 @@ fun ScanScreen(
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(
-                            scanner?.name ?: "No scanner selected",
+                            scanner?.name ?: "Nenhum scanner selecionado",
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             scanner?.let {
                                 if (it.supportsScan) "${it.model} · ${it.status.label}"
-                                else "This device does not expose a scanner; camera and photos still work."
-                            } ?: "Camera, photos and simulated scanning are available.",
+                                else "Este dispositivo não expõe um scanner; câmera e fotos continuam funcionando."
+                            } ?: "Câmera, fotos e digitalização simulada estão disponíveis.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -214,12 +215,12 @@ fun ScanScreen(
                 }
             }
 
-            SectionHeader(title = "Scan from")
+            SectionHeader(title = "Digitalizar de")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = ::capture, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Filled.PhotoCamera, contentDescription = null)
                     Spacer(Modifier.padding(horizontal = 4.dp))
-                    Text("Camera")
+                    Text("Câmera")
                 }
                 OutlinedButton(
                     onClick = {
@@ -231,18 +232,18 @@ fun ScanScreen(
                 ) {
                     Icon(Icons.Filled.PhotoLibrary, contentDescription = null)
                     Spacer(Modifier.padding(horizontal = 4.dp))
-                    Text("Photos")
+                    Text("Fotos")
                 }
             }
             OutlinedButton(onClick = ::simulated, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Scanner, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 4.dp))
-                Text("Simulated scanner page")
+                Text("Página de scanner simulada")
             }
 
             SectionHeader(
-                title = "Pages (${pages.size})",
-                actionLabel = if (pages.isNotEmpty()) "Clear" else null,
+                title = "Páginas (${pages.size})",
+                actionLabel = if (pages.isNotEmpty()) "Limpar" else null,
                 onAction = if (pages.isNotEmpty()) {
                     { pages = emptyList() }
                 } else null
@@ -256,12 +257,12 @@ fun ScanScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "No pages yet",
+                            "Nenhuma página ainda",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            "Capture a page with the camera, pick photos or use the simulated scanner.",
+                            "Capture uma página com a câmera, escolha fotos ou use o scanner simulado.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -282,34 +283,34 @@ fun ScanScreen(
                             Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    "Page ${index + 1}",
+                                    "Página ${index + 1}",
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    "Ready to save or print",
+                                    "Pronto para salvar ou imprimir",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             IconButton(onClick = { pages = pages.filterIndexed { i, _ -> i != index } }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Remove page")
+                                Icon(Icons.Filled.Delete, contentDescription = "Remover página")
                             }
                         }
                     }
                 }
             }
 
-            SectionHeader(title = "Scan settings")
+            SectionHeader(title = "Configurações de digitalização")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     DropdownChoice(
-                        label = "Scan type",
-                        options = listOf("Color", "Black and White", "Grayscale"),
+                        label = "Tipo de digitalização",
+                        options = listOf("Colorido", "Preto e branco", "Escala de cinza"),
                         selected = scanSettings.colorMode,
                         onSelected = { onScanSettingsChange(scanSettings.copy(colorMode = it)) }
                     )
                     DropdownChoice(
-                        label = "Resolution",
+                        label = "Resolução",
                         options = listOf("75 dpi", "150 dpi", "200 dpi", "300 dpi", "400 dpi", "600 dpi", "1200 dpi"),
                         selected = "${scanSettings.dpi} dpi",
                         onSelected = {
@@ -319,14 +320,14 @@ fun ScanScreen(
                         }
                     )
                     DropdownChoice(
-                        label = "Original size",
-                        options = listOf("Auto Detect", "A4", "Letter", "Legal", "A3", "A5", "A6"),
+                        label = "Tamanho original",
+                        options = listOf("Detecção automática", "A4", "Carta", "Ofício", "A3", "A5", "A6"),
                         selected = scanSettings.originalSize,
                         onSelected = { onScanSettingsChange(scanSettings.copy(originalSize = it)) }
                     )
                     DropdownChoice(
-                        label = "Sides",
-                        options = listOf("One-Sided", "Two-Sided (Long Edge)", "Two-Sided (Short Edge)"),
+                        label = "Lados",
+                        options = listOf("Um lado", "Frente e verso (borda longa)", "Frente e verso (borda curta)"),
                         selected = scanSettings.sides,
                         onSelected = { onScanSettingsChange(scanSettings.copy(sides = it)) }
                     )
@@ -341,7 +342,7 @@ fun ScanScreen(
             ) {
                 Icon(Icons.Filled.PictureAsPdf, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 6.dp))
-                Text("Save PDF")
+                Text("Salvar PDF")
             }
             OutlinedButton(
                 onClick = ::printPages,
@@ -351,12 +352,12 @@ fun ScanScreen(
             ) {
                 Icon(Icons.Filled.Print, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 6.dp))
-                Text("Print scan")
+                Text("Imprimir digitalização")
             }
             OutlinedButton(onClick = ::simulated, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Add, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 4.dp))
-                Text("Add simulated page")
+                Text("Adicionar página simulada")
             }
         }
     }

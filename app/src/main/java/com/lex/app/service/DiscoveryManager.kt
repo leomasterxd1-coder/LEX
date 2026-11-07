@@ -31,7 +31,7 @@ class DiscoveryManager(
         if (running) return
         val manager = nsdManager
         if (manager == null) {
-            onStatus("Network discovery is not available on this device.")
+            onStatus("A busca de rede não está disponível neste dispositivo.")
             return
         }
         running = true
@@ -49,7 +49,7 @@ class DiscoveryManager(
                 override fun onDiscoveryStopped(serviceType: String) = Unit
 
                 override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) {
-                    onStatus("Could not start discovery for $serviceType (code $errorCode).")
+                    onStatus("Não foi possível iniciar a busca por $serviceType (código $errorCode).")
                 }
 
                 override fun onStopDiscoveryFailed(serviceType: String, errorCode: Int) = Unit
@@ -58,10 +58,10 @@ class DiscoveryManager(
             runCatching {
                 manager.discoverServices(type, NsdManager.PROTOCOL_DNS_SD, listener)
             }.onFailure {
-                onStatus("Network discovery error: ${it.message ?: "unknown"}")
+                onStatus("Erro na busca de rede: ${it.message ?: "desconhecido"}")
             }
         }
-        onStatus("Searching for printers on your network…")
+        onStatus("Procurando impressoras na sua rede…")
     }
 
     @Suppress("DEPRECATION")
@@ -76,8 +76,8 @@ class DiscoveryManager(
                     val address = serviceInfo.host?.hostAddress ?: ""
                     val scanner = serviceInfo.serviceType.contains("scanner", ignoreCase = true)
                     val device = Device(
-                        name = serviceInfo.serviceName.ifBlank { "Network device" },
-                        model = if (scanner) "Network scanner" else "Network printer",
+                        name = serviceInfo.serviceName.ifBlank { "Dispositivo de rede" },
+                        model = if (scanner) "Scanner de rede" else "Impressora de rede",
                         address = address,
                         type = if (scanner) DeviceType.SCANNER else DeviceType.MFP,
                         color = !scanner,
@@ -88,7 +88,7 @@ class DiscoveryManager(
                 }
             })
         }.onFailure {
-            onStatus("Could not resolve a discovered device.")
+            onStatus("Não foi possível resolver um dispositivo encontrado.")
         }
     }
 

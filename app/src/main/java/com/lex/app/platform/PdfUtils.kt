@@ -27,13 +27,13 @@ object PdfUtils {
     private const val PAGE_HEIGHT = 842
 
     fun displayName(context: Context, uri: Uri): String {
-        if (uri.scheme == "file") return uri.lastPathSegment ?: "Document"
+        if (uri.scheme == "file") return uri.lastPathSegment ?: "Documento"
         return runCatching {
             context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
                 ?.use { cursor ->
                     if (cursor.moveToFirst()) cursor.getString(0) else null
                 }
-        }.getOrNull() ?: uri.lastPathSegment ?: "Document"
+        }.getOrNull() ?: uri.lastPathSegment ?: "Documento"
     }
 
     fun sizeLabel(context: Context, uri: Uri): String {
@@ -64,7 +64,7 @@ object PdfUtils {
                 document.finishPage(page)
                 bitmap.recycle()
             }
-            if (document.pages.isEmpty()) error("No pages could be created from the selected files.")
+            if (document.pages.isEmpty()) error("Nenhuma página pôde ser criada a partir dos arquivos selecionados.")
             FileOutputStream(output).use { document.writeTo(it) }
         } finally {
             document.close()
@@ -126,7 +126,7 @@ object PdfUtils {
     fun pdfFromImageBytes(context: Context, bytes: ByteArray): File {
         val output = File(context.cacheDir, "lex_image_${System.currentTimeMillis()}.pdf")
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-            ?: error("Could not read the image.")
+            ?: error("Não foi possível ler a imagem.")
         val document = PdfDocument()
         try {
             val page = document.startPage(
@@ -146,12 +146,12 @@ object PdfUtils {
         val bitmap = Bitmap.createBitmap(1240, 1754, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawColor(Color.WHITE)
-        val red = Paint().apply { color = Color.rgb(200, 16, 46); isAntiAlias = true }
+        val red = Paint().apply { color = Color.rgb(230, 0, 0); isAntiAlias = true }
         canvas.drawRect(0f, 0f, 1240f, 120f, red)
         val white = Paint().apply { color = Color.WHITE; textSize = 48f; isAntiAlias = true; typeface = Typeface.DEFAULT_BOLD }
         canvas.drawText("LEX", 60f, 78f, white)
         val dark = Paint().apply { color = Color.rgb(40, 40, 40); textSize = 38f; isAntiAlias = true }
-        canvas.drawText("Simulated scan", 60f, 230f, dark)
+        canvas.drawText("Digitalização simulada", 60f, 230f, dark)
         val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
         canvas.drawText(date, 60f, 290f, dark)
         val line = Paint().apply { color = Color.rgb(90, 90, 90); strokeWidth = 3f; isAntiAlias = true }
@@ -164,10 +164,10 @@ object PdfUtils {
         canvas.drawRect(60f, 1420f, 1180f, 1660f, Paint().apply {
             style = Paint.Style.STROKE
             strokeWidth = 4f
-            color = Color.rgb(200, 16, 46)
+            color = Color.rgb(230, 0, 0)
         })
         val caption = Paint().apply { color = Color.rgb(120, 120, 120); textSize = 30f; isAntiAlias = true }
-        canvas.drawText("Place your document on the scanner glass.", 75f, 1550f, caption)
+        canvas.drawText("Coloque o documento no vidro do scanner.", 75f, 1550f, caption)
 
         val dir = File(context.cacheDir, "scans").apply { mkdirs() }
         val file = File(dir, "scan_${System.currentTimeMillis()}.png")

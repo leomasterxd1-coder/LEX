@@ -35,7 +35,7 @@ object PrintController {
         jobName: String,
         settings: PrintSettings
     ): Result<Unit> = runCatching {
-        require(uris.isNotEmpty()) { "Select at least one page." }
+        require(uris.isNotEmpty()) { "Selecione pelo menos uma página." }
         val pdf = PdfUtils.pdfFromUris(context, uris)
         val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
         val adapter = PdfFilePrintAdapter(pdf, jobName, uris.size)
@@ -77,7 +77,7 @@ object PrintController {
                 val file = File(context.cacheDir, "lex_pdf_${System.currentTimeMillis()}.pdf")
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     FileOutputStream(file).use { output -> input.copyTo(output) }
-                } ?: error("Could not open the selected PDF.")
+                } ?: error("Não foi possível abrir o PDF selecionado.")
                 file to PrintDocumentInfo.PAGE_COUNT_UNKNOWN
             }
 
@@ -93,24 +93,24 @@ object PrintController {
                         }
                     }
                     builder.toString()
-                } ?: error("Could not read the selected file.")
+                } ?: error("Não foi possível ler o arquivo selecionado.")
                 PdfUtils.pdfFromText(context, text)
             }
 
-            else -> error("This file type is not supported for direct printing.")
+            else -> error("Este tipo de arquivo não é compatível com impressão direta.")
         }
     }
 
     private fun attributes(settings: PrintSettings): PrintAttributes {
         val media = when (settings.mediaSize.lowercase()) {
-            "letter" -> PrintAttributes.MediaSize.NA_LETTER
-            "legal" -> PrintAttributes.MediaSize.NA_LEGAL
+            "letter", "carta" -> PrintAttributes.MediaSize.NA_LETTER
+            "legal", "ofício", "oficio" -> PrintAttributes.MediaSize.NA_LEGAL
             "a3" -> PrintAttributes.MediaSize.ISO_A3
             "a5" -> PrintAttributes.MediaSize.ISO_A5
             "a6" -> PrintAttributes.MediaSize.ISO_A6
             else -> PrintAttributes.MediaSize.ISO_A4
         }
-        val oriented = if (settings.orientation.equals("Landscape", ignoreCase = true)) {
+        val oriented = if (settings.orientation.equals("Paisagem", ignoreCase = true) || settings.orientation.equals("Landscape", ignoreCase = true)) {
             media.asLandscape()
         } else {
             media.asPortrait()
@@ -160,7 +160,7 @@ object PrintController {
                 return
             }
             if (destination == null) {
-                callback.onWriteFailed("No destination was provided.")
+                callback.onWriteFailed("Nenhum destino foi fornecido.")
                 return
             }
             runCatching {
@@ -172,7 +172,7 @@ object PrintController {
             }.onSuccess {
                 callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
             }.onFailure {
-                callback.onWriteFailed(it.message ?: "Could not write the print job.")
+                callback.onWriteFailed(it.message ?: "Não foi possível gravar o trabalho de impressão.")
             }
         }
 

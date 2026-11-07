@@ -76,7 +76,7 @@ fun LexTopBar(
         navigationIcon = {
             if (onBack != null) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
                 }
             }
         },
@@ -254,7 +254,7 @@ fun DeviceCard(
                             color = MaterialTheme.colorScheme.primaryContainer
                         ) {
                             Text(
-                                "Default",
+                                "Padrão",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -275,12 +275,12 @@ fun DeviceCard(
             }
             if (onSetDefault != null && !device.isDefault) {
                 IconButton(onClick = onSetDefault) {
-                    Icon(Icons.Outlined.StarBorder, contentDescription = "Set as default")
+                    Icon(Icons.Outlined.StarBorder, contentDescription = "Definir como padrão")
                 }
             } else if (device.isDefault) {
                 Icon(
                     Icons.Filled.Star,
-                    contentDescription = "Default device",
+                    contentDescription = "Dispositivo padrão",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(12.dp)
                 )
@@ -317,7 +317,7 @@ fun JobCard(
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "${job.kind.label} · ${job.deviceName} · ${job.pages} page(s) · ${formatDate(job.createdAt)}",
+                    "${job.kind.label} · ${job.deviceName} · ${job.pages} página(s) · ${formatDate(job.createdAt)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -330,11 +330,11 @@ fun JobCard(
                 }
             }
             if (onRelease != null && (job.status == JobStatus.QUEUED || job.status == JobStatus.HELD)) {
-                TextButton(onClick = onRelease) { Text("Release") }
+                TextButton(onClick = onRelease) { Text("Liberar") }
             }
             if (onDelete != null) {
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Delete job")
+                    Icon(Icons.Filled.Delete, contentDescription = "Excluir trabalho")
                 }
             }
         }

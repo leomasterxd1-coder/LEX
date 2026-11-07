@@ -69,7 +69,7 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addDevice(device: Device) {
         repository.addDevice(device)
-        _events.tryEmit("${device.name} added.")
+        _events.tryEmit("${device.name} adicionado.")
     }
 
     fun addDemoDevice() {
@@ -78,19 +78,19 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeDevice(id: String) {
         repository.removeDevice(id)
-        _events.tryEmit("Device removed.")
+        _events.tryEmit("Dispositivo removido.")
     }
 
     fun setDefaultDevice(id: String) {
         repository.setDefaultDevice(id)
-        _events.tryEmit("Default device updated.")
+        _events.tryEmit("Dispositivo padrão atualizado.")
     }
 
     fun startDiscovery() {
         if (_discovering.value) return
         _discovered.value = emptyList()
         _discovering.value = true
-        _discoveryStatus.value = "Searching for printers on your network…"
+        _discoveryStatus.value = "Procurando impressoras na sua rede…"
         discoveryManager = DiscoveryManager(
             context = getApplication(),
             onFound = { device ->
@@ -114,9 +114,9 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
         discoveryManager = null
         _discovering.value = false
         if (_discovered.value.isEmpty()) {
-            _discoveryStatus.value = "No devices found. Add one manually or try again."
+            _discoveryStatus.value = "Nenhum dispositivo encontrado. Adicione um manualmente ou tente novamente."
         } else {
-            _discoveryStatus.value = "Discovery finished."
+            _discoveryStatus.value = "Busca concluída."
         }
     }
 
@@ -133,7 +133,7 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
         val job = PrintJob(
             name = name,
             kind = kind,
-            deviceName = device?.name ?: "No device selected",
+            deviceName = device?.name ?: "Nenhum dispositivo selecionado",
             pages = pages,
             color = color,
             duplex = duplex,
@@ -145,7 +145,7 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
             repository.updateJob(job.id) { it.copy(status = JobStatus.PROCESSING) }
             delay(4_000)
             repository.updateJob(job.id) { it.copy(status = JobStatus.COMPLETED) }
-            _events.emit("${kind.label} job completed: $name")
+            _events.emit("${kind.label} concluído: $name")
             if (notify) notifyJobCompleted(job)
         }
     }
@@ -155,7 +155,7 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             delay(2_000)
             repository.updateJob(id) { it.copy(status = JobStatus.COMPLETED) }
-            _events.emit("Job released and completed.")
+            _events.emit("Trabalho liberado e concluído.")
         }
     }
 
@@ -164,17 +164,17 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
             it.status == JobStatus.QUEUED || it.status == JobStatus.HELD
         }
         pending.forEach { releaseJob(it.id) }
-        if (pending.isNotEmpty()) _events.tryEmit("Releasing ${pending.size} job(s).")
+        if (pending.isNotEmpty()) _events.tryEmit("Liberando ${pending.size} trabalho(s).")
     }
 
     fun deleteJob(id: String) {
         repository.deleteJob(id)
-        _events.tryEmit("Job removed.")
+        _events.tryEmit("Trabalho removido.")
     }
 
     fun clearFinishedJobs() {
         repository.clearFinishedJobs()
-        _events.tryEmit("Finished jobs cleared.")
+        _events.tryEmit("Trabalhos concluídos limpos.")
     }
 
     fun addWebHistory(url: String, title: String) {
@@ -184,29 +184,29 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearWebHistory() {
         repository.clearWebHistory()
-        _events.tryEmit("Web history cleared.")
+        _events.tryEmit("Histórico da web apagado.")
     }
 
     fun toggleSource(id: String, enabled: Boolean) = repository.updateSource(id, enabled)
 
     fun resetApp() {
         repository.reset()
-        _events.tryEmit("LEX was reset.")
+        _events.tryEmit("O LEX foi redefinido.")
     }
 
     fun importDevices(raw: String): Result<Int> = runCatching {
         val text = raw.trim()
-        require(text.isNotEmpty()) { "Paste a JSON list of devices." }
+        require(text.isNotEmpty()) { "Cole uma lista JSON de dispositivos." }
         val array = if (text.startsWith("[")) JSONArray(text) else JSONArray().put(JSONObject(text))
         val imported = buildList {
             for (index in 0 until array.length()) {
                 val item = array.optJSONObject(index) ?: continue
-                val name = item.optString("name").ifBlank { "Imported device" }
+                val name = item.optString("name").ifBlank { "Dispositivo importado" }
                 val address = item.optString("address")
                 add(
                     Device(
                         name = name,
-                        model = item.optString("model", "LEX compatible device"),
+                        model = item.optString("model", "Dispositivo compatível com LEX"),
                         address = address,
                         type = runCatching {
                             DeviceType.valueOf(item.optString("type", DeviceType.MFP.name))
@@ -216,7 +216,7 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
         }
-        require(imported.isNotEmpty()) { "No devices were found in the JSON." }
+        require(imported.isNotEmpty()) { "Nenhum dispositivo foi encontrado no JSON." }
         repository.addDevices(imported)
         imported.size
     }
@@ -266,7 +266,7 @@ class LexViewModel(application: Application) : AndroidViewModel(application) {
         )
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_lex)
-            .setContentTitle("${job.kind.label} job completed")
+            .setContentTitle("${job.kind.label} concluído")
             .setContentText(job.name)
             .setAutoCancel(true)
             .setContentIntent(pending)

@@ -81,7 +81,7 @@ fun MoreScreen(
     onOpenDataCollection: () -> Unit,
     onOpenOpenSource: () -> Unit
 ) {
-    Scaffold(topBar = { LexTopBar(title = "More") }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Mais") }) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -103,27 +103,27 @@ fun MoreScreen(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            "${state.devices.size} device(s) · ${state.jobs.size} job(s)",
+                            "${state.devices.size} dispositivo(s) · ${state.jobs.size} trabalho(s)",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }
             }
-            item { MoreRow(Icons.Filled.Devices, "Manage devices", "Add, discover and remove printers", onOpenDevices) }
-            item { MoreRow(Icons.Filled.FolderOpen, "Manage sources", "Files, photos, camera, web and cloud", onOpenSources) }
-            item { MoreRow(Icons.Filled.History, "Print queue", "Held jobs and release", onOpenQueue) }
-            item { MoreRow(Icons.Filled.Input, "Import data", "Bring devices from another app", onOpenImport) }
-            item { MoreRow(Icons.Filled.Settings, "Settings", "Print and scan defaults", onOpenSettings) }
-            item { MoreRow(Icons.Filled.PrivacyTip, "Data collection", "Privacy controls", onOpenDataCollection) }
-            item { MoreRow(Icons.Filled.NewReleases, "What's new", "Release notes for LEX", onOpenWhatsNew) }
-            item { MoreRow(Icons.Filled.Code, "Open source licenses", "Libraries used by LEX", onOpenOpenSource) }
-            item { MoreRow(Icons.Filled.Info, "About LEX", "Version and legal notice", onOpenAbout) }
-            item { MoreRow(Icons.Filled.HelpOutline, "Help", "Connection and printing tips", onOpenAbout) }
+            item { MoreRow(Icons.Filled.Devices, "Gerenciar dispositivos", "Adicione, descubra e remova impressoras", onOpenDevices) }
+            item { MoreRow(Icons.Filled.FolderOpen, "Gerenciar fontes", "Arquivos, fotos, câmera, web e nuvem", onOpenSources) }
+            item { MoreRow(Icons.Filled.History, "Fila de impressão", "Trabalhos retidos e liberação", onOpenQueue) }
+            item { MoreRow(Icons.Filled.Input, "Importar dados", "Traga dispositivos de outro aplicativo", onOpenImport) }
+            item { MoreRow(Icons.Filled.Settings, "Configurações", "Padrões de impressão e digitalização", onOpenSettings) }
+            item { MoreRow(Icons.Filled.PrivacyTip, "Coleta de dados", "Controles de privacidade", onOpenDataCollection) }
+            item { MoreRow(Icons.Filled.NewReleases, "Novidades", "Notas de versão do LEX", onOpenWhatsNew) }
+            item { MoreRow(Icons.Filled.Code, "Licenças de código aberto", "Bibliotecas usadas pelo LEX", onOpenOpenSource) }
+            item { MoreRow(Icons.Filled.Info, "Sobre o LEX", "Versão e aviso legal", onOpenAbout) }
+            item { MoreRow(Icons.Filled.HelpOutline, "Ajuda", "Dicas de conexão e impressão", onOpenAbout) }
             item {
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    "LEX is an independent clean-room project. It is not affiliated with, endorsed by or sponsored by Lexmark.",
+                    "O LEX é um projeto independente, criado do zero. Não é afiliado, endossado ou patrocinado pela Lexmark.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -167,7 +167,7 @@ fun SettingsScreen(
 ) {
     var showReset by remember { mutableStateOf(false) }
 
-    Scaffold(topBar = { LexTopBar(title = "Settings", onBack = onBack) }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Configurações", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -176,41 +176,41 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            SectionHeader(title = "Print defaults")
+            SectionHeader(title = "Padrões de impressão")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     NumberStepper(
-                        label = "Copies",
+                        label = "Cópias",
                         value = state.printSettings.copies,
                         onChange = { onPrintSettingsChange(state.printSettings.copy(copies = it)) }
                     )
                     SwitchRow(
-                        title = "Color",
-                        subtitle = "Use color when the printer supports it",
+                        title = "Cor",
+                        subtitle = "Usar cor quando a impressora suportar",
                         checked = state.printSettings.color,
                         onCheckedChange = {
                             onPrintSettingsChange(state.printSettings.copy(color = it))
                         }
                     )
                     SwitchRow(
-                        title = "Two-sided",
-                        subtitle = "Print on both sides of the paper",
+                        title = "Frente e verso",
+                        subtitle = "Imprimir nos dois lados do papel",
                         checked = state.printSettings.duplex,
                         onCheckedChange = {
                             onPrintSettingsChange(state.printSettings.copy(duplex = it))
                         }
                     )
                     DropdownChoice(
-                        label = "Media size",
-                        options = listOf("A4", "Letter", "Legal", "A3", "A5", "A6"),
+                        label = "Tamanho do papel",
+                        options = listOf("A4", "Carta", "Ofício", "A3", "A5", "A6"),
                         selected = state.printSettings.mediaSize,
                         onSelected = {
                             onPrintSettingsChange(state.printSettings.copy(mediaSize = it))
                         }
                     )
                     DropdownChoice(
-                        label = "Orientation",
-                        options = listOf("Portrait", "Landscape"),
+                        label = "Orientação",
+                        options = listOf("Retrato", "Paisagem"),
                         selected = state.printSettings.orientation,
                         onSelected = {
                             onPrintSettingsChange(state.printSettings.copy(orientation = it))
@@ -219,19 +219,19 @@ fun SettingsScreen(
                 }
             }
 
-            SectionHeader(title = "Scan defaults")
+            SectionHeader(title = "Padrões de digitalização")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     DropdownChoice(
-                        label = "Scan type",
-                        options = listOf("Color", "Black and White", "Grayscale"),
+                        label = "Tipo de digitalização",
+                        options = listOf("Colorido", "Preto e branco", "Escala de cinza"),
                         selected = state.scanSettings.colorMode,
                         onSelected = {
                             onScanSettingsChange(state.scanSettings.copy(colorMode = it))
                         }
                     )
                     DropdownChoice(
-                        label = "Resolution",
+                        label = "Resolução",
                         options = listOf("150 dpi", "200 dpi", "300 dpi", "400 dpi", "600 dpi"),
                         selected = "${state.scanSettings.dpi} dpi",
                         onSelected = {
@@ -243,8 +243,8 @@ fun SettingsScreen(
                         }
                     )
                     DropdownChoice(
-                        label = "Sides",
-                        options = listOf("One-Sided", "Two-Sided (Long Edge)", "Two-Sided (Short Edge)"),
+                        label = "Lados",
+                        options = listOf("Um lado", "Frente e verso (borda longa)", "Frente e verso (borda curta)"),
                         selected = state.scanSettings.sides,
                         onSelected = {
                             onScanSettingsChange(state.scanSettings.copy(sides = it))
@@ -253,29 +253,29 @@ fun SettingsScreen(
                 }
             }
 
-            SectionHeader(title = "Privacy and notifications")
+            SectionHeader(title = "Privacidade e notificações")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     SwitchRow(
-                        title = "Job notifications",
-                        subtitle = "Show a notification when a job completes",
+                        title = "Notificações de trabalhos",
+                        subtitle = "Mostrar uma notificação quando um trabalho terminar",
                         checked = state.notifications,
                         onCheckedChange = onNotificationsChange
                     )
                     SwitchRow(
-                        title = "Anonymous usage data",
-                        subtitle = "Optional diagnostics, off by default",
+                        title = "Dados de uso anônimos",
+                        subtitle = "Diagnósticos opcionais, desativados por padrão",
                         checked = state.dataCollection,
                         onCheckedChange = onDataCollectionChange
                     )
                 }
             }
 
-            SectionHeader(title = "Reset")
+            SectionHeader(title = "Redefinir")
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        "Reset LEX to onboarding. Devices, jobs and preferences will be cleared.",
+                        "Redefinir o LEX para a tela inicial. Dispositivos, trabalhos e preferências serão apagados.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -283,13 +283,13 @@ fun SettingsScreen(
                     OutlinedButton(onClick = { showReset = true }) {
                         Icon(Icons.Filled.Refresh, contentDescription = null)
                         Spacer(Modifier.padding(horizontal = 4.dp))
-                        Text("Reset LEX")
+                        Text("Redefinir LEX")
                     }
                 }
             }
 
             Text(
-                "Theme: LEX Red · arm64-v8a release",
+                "Tema: vermelho vivo · compilação arm64-v8a",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -299,18 +299,18 @@ fun SettingsScreen(
     if (showReset) {
         AlertDialog(
             onDismissRequest = { showReset = false },
-            title = { Text("Reset LEX?") },
-            text = { Text("This clears all local devices, jobs, history and settings.") },
+            title = { Text("Redefinir o LEX?") },
+            text = { Text("Isso apaga todos os dispositivos, trabalhos, histórico e configurações locais.") },
             confirmButton = {
                 TextButton(
                     onClick = {
                         showReset = false
                         onReset()
                     }
-                ) { Text("Reset") }
+                ) { Text("Redefinir") }
             },
             dismissButton = {
-                TextButton(onClick = { showReset = false }) { Text("Cancel") }
+                TextButton(onClick = { showReset = false }) { Text("Cancelar") }
             }
         )
     }
@@ -340,7 +340,7 @@ private fun NumberStepper(label: String, value: Int, onChange: (Int) -> Unit) {
 
 @Composable
 fun AboutScreen(onBack: () -> Unit, onOpenOpenSource: () -> Unit) {
-    Scaffold(topBar = { LexTopBar(title = "About LEX", onBack = onBack) }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Sobre o LEX", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -361,7 +361,7 @@ fun AboutScreen(onBack: () -> Unit, onOpenOpenSource: () -> Unit) {
                 fontWeight = FontWeight.Bold
             )
             Text(
-                "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                "Versão ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -369,18 +369,18 @@ fun AboutScreen(onBack: () -> Unit, onOpenOpenSource: () -> Unit) {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        "LEX is a clean-room Jetpack Compose app inspired by mobile print workflows. It recreates the experience with original code and assets.",
+                        "O LEX é um aplicativo Jetpack Compose independente inspirado em fluxos de impressão móvel. Ele recria a experiência com código e recursos originais.",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        "LEX is not affiliated with, endorsed by or sponsored by Lexmark. Lexmark is a trademark of its respective owner.",
+                        "O LEX não é afiliado, endossado ou patrocinado pela Lexmark. Lexmark é uma marca registrada de seu respectivo proprietário.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        "Build: arm64-v8a · minSdk 29 · targetSdk 36",
+                        "Compilação: arm64-v8a · minSdk 29 · targetSdk 36",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -390,11 +390,11 @@ fun AboutScreen(onBack: () -> Unit, onOpenOpenSource: () -> Unit) {
             OutlinedButton(onClick = onOpenOpenSource, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Code, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 4.dp))
-                Text("Open source licenses")
+                Text("Licenças de código aberto")
             }
             Spacer(Modifier.height(24.dp))
             Text(
-                "© 2026 LEX contributors",
+                "© 2026 Contribuidores do LEX",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -404,7 +404,7 @@ fun AboutScreen(onBack: () -> Unit, onOpenOpenSource: () -> Unit) {
 
 @Composable
 fun WhatsNewScreen(onBack: () -> Unit) {
-    Scaffold(topBar = { LexTopBar(title = "What's new", onBack = onBack) }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Novidades", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -413,17 +413,17 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "LEX 1.0.0",
+                "LEX 1.0.1",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-            Bullet("Red LEX theme implemented with Material 3.")
-            Bullet("Print files, photos and web pages through the Android print framework.")
-            Bullet("Scan with camera, photo picker or a simulated scanner page.")
-            Bullet("Discover compatible printers with NSD/mDNS and add devices manually.")
-            Bullet("Queue, release and track print, copy, scan and web jobs.")
-            Bullet("Import devices from JSON and manage sources, privacy and defaults.")
-            Bullet("arm64-v8a release built automatically on GitHub Actions.")
+            Bullet("Tema vermelho vivo implementado com Material 3.")
+            Bullet("Imprima arquivos, fotos e páginas da web pelo sistema de impressão do Android.")
+            Bullet("Digitalize com a câmera, o seletor de fotos ou uma página de scanner simulada.")
+            Bullet("Descubra impressoras compatíveis com NSD/mDNS e adicione dispositivos manualmente.")
+            Bullet("Gerencie, libere e acompanhe trabalhos de impressão, cópia, digitalização e web.")
+            Bullet("Importe dispositivos de JSON e gerencie fontes, privacidade e padrões.")
+            Bullet("Compilação arm64-v8a gerada automaticamente no GitHub Actions.")
         }
     }
 }
@@ -434,7 +434,7 @@ fun DataCollectionScreen(
     onBack: () -> Unit,
     onDataCollectionChange: (Boolean) -> Unit
 ) {
-    Scaffold(topBar = { LexTopBar(title = "Data collection", onBack = onBack) }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Coleta de dados", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -445,19 +445,19 @@ fun DataCollectionScreen(
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     SwitchRow(
-                        title = "Anonymous usage data",
-                        subtitle = "Share optional diagnostics to improve LEX",
+                        title = "Dados de uso anônimos",
+                        subtitle = "Compartilhar diagnósticos opcionais para melhorar o LEX",
                         checked = state.dataCollection,
                         onCheckedChange = onDataCollectionChange
                     )
                 }
             }
             Text(
-                "LEX stores devices, jobs, history and preferences only on this device. No account is required and no document content is uploaded by LEX.",
+                "O LEX armazena dispositivos, trabalhos, histórico e preferências apenas neste dispositivo. Não é necessário criar conta e nenhum conteúdo de documento é enviado pelo LEX.",
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                "When enabled, anonymous usage data would be limited to feature counts and crash diagnostics. It is disabled by default.",
+                "Quando ativados, os dados anônimos se limitam à contagem de recursos e diagnósticos de falhas. Ficam desativados por padrão.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -467,7 +467,7 @@ fun DataCollectionScreen(
 
 @Composable
 fun OpenSourceScreen(onBack: () -> Unit) {
-    Scaffold(topBar = { LexTopBar(title = "Open source", onBack = onBack) }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Código aberto", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -476,17 +476,17 @@ fun OpenSourceScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                "LEX is built with open source software:",
+                "O LEX é construído com software de código aberto:",
                 style = MaterialTheme.typography.bodyMedium
             )
-            LicenseItem("Kotlin", "Apache License 2.0")
-            LicenseItem("Jetpack Compose", "Apache License 2.0")
-            LicenseItem("AndroidX / Material 3", "Apache License 2.0")
-            LicenseItem("Navigation Compose", "Apache License 2.0")
-            LicenseItem("Kotlin Coroutines", "Apache License 2.0")
-            LicenseItem("AndroidX DocumentFile", "Apache License 2.0")
+            LicenseItem("Kotlin", "Licença Apache 2.0")
+            LicenseItem("Jetpack Compose", "Licença Apache 2.0")
+            LicenseItem("AndroidX / Material 3", "Licença Apache 2.0")
+            LicenseItem("Navigation Compose", "Licença Apache 2.0")
+            LicenseItem("Kotlin Coroutines", "Licença Apache 2.0")
+            LicenseItem("AndroidX DocumentFile", "Licença Apache 2.0")
             Text(
-                "Android WebView and the Android print framework are part of Android and are used under their respective platform terms.",
+                "O WebView do Android e o sistema de impressão do Android fazem parte do Android e são usados sob os respectivos termos da plataforma.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -526,12 +526,12 @@ fun ImportDataScreen(
             }.onSuccess { content ->
                 text = content.orEmpty()
             }.onFailure {
-                Toast.makeText(context, "Could not read the file.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Não foi possível ler o arquivo.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    Scaffold(topBar = { LexTopBar(title = "Import data", onBack = onBack) }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Importar dados", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -540,7 +540,7 @@ fun ImportDataScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "Import saved devices and preferences from another print app. LEX accepts a JSON list with name, model, address and type.",
+                "Importe dispositivos e preferências salvos de outro aplicativo de impressão. O LEX aceita uma lista JSON com os campos name, model, address e type.",
                 style = MaterialTheme.typography.bodyMedium
             )
             OutlinedTextField(
@@ -549,20 +549,20 @@ fun ImportDataScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp),
-                label = { Text("Devices JSON") },
-                placeholder = { Text("[{\"name\":\"Printer\",\"address\":\"192.168.1.50\"}]") }
+                label = { Text("JSON de dispositivos") },
+                placeholder = { Text("[{\"name\":\"Impressora\",\"address\":\"192.168.1.50\"}]") }
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { filePicker.launch(arrayOf("application/json", "text/*")) }) {
-                    Text("Choose file")
+                    Text("Escolher arquivo")
                 }
                 OutlinedButton(onClick = { text = exportJson() }) {
-                    Text("Export current")
+                    Text("Exportar atuais")
                 }
                 OutlinedButton(onClick = {
-                    text = "[\n  {\"name\":\"Office Printer\",\"address\":\"192.168.1.50\",\"type\":\"MFP\"}\n]"
+                    text = "[\n  {\"name\":\"Impressora do escritório\",\"address\":\"192.168.1.50\",\"type\":\"MFP\"}\n]"
                 }) {
-                    Text("Sample")
+                    Text("Exemplo")
                 }
             }
             Button(
@@ -571,22 +571,22 @@ fun ImportDataScreen(
                         .onSuccess {
                             Toast.makeText(
                                 context,
-                                "$it device(s) imported.",
+                                "$it dispositivo(s) importado(s).",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                         .onFailure {
                             Toast.makeText(
                                 context,
-                                it.message ?: "Import failed.",
+                                it.message ?: "Falha na importação.",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
                 },
                 modifier = Modifier.fillMaxWidth()
-            ) { Text("Import devices") }
+            ) { Text("Importar dispositivos") }
             Text(
-                "Imported devices are stored locally. No data leaves your device.",
+                "Os dispositivos importados ficam armazenados localmente. Nenhum dado sai do seu dispositivo.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -600,7 +600,7 @@ fun SourcesScreen(
     onBack: () -> Unit,
     onToggleSource: (String, Boolean) -> Unit
 ) {
-    Scaffold(topBar = { LexTopBar(title = "Sources", onBack = onBack) }) { innerPadding ->
+    Scaffold(topBar = { LexTopBar(title = "Fontes", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -609,7 +609,7 @@ fun SourcesScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                "Choose which sources are available when printing or scanning.",
+                "Escolha quais fontes estão disponíveis ao imprimir ou digitalizar.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -643,7 +643,7 @@ fun SourcesScreen(
                 }
             }
             Text(
-                "Cloud sources are a demo placeholder in this clean-room build. Local files, photos, camera and web printing work through Android APIs.",
+                "As fontes na nuvem são um espaço reservado para demonstração nesta versão independente. Arquivos locais, fotos, câmera e impressão web funcionam pelas APIs do Android.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
