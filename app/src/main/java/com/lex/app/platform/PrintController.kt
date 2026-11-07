@@ -12,46 +12,63 @@ import android.print.PrintDocumentInfo
 import android.print.PrintManager
 import android.webkit.WebView
 import com.lex.app.data.PrintSettings
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
 object PrintController {
 
-    fun printUri(
+    suspend fun printUri(
         context: Context,
         uri: Uri,
         jobName: String,
         settings: PrintSettings
-    ): Result<Unit> = runCatching {
-        val (pdf, pageCount) = preparePdf(context, uri)
-        val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-        val adapter = PdfFilePrintAdapter(pdf, jobName, pageCount)
-        manager.print(jobName, adapter, attributes(settings))
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val (pdf, pageCount) = preparePdf(context, uri)
+            withContext(Dispatchers.Main) {
+                val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
+                val adapter = PdfFilePrintAdapter(pdf, jobName, pageCount)
+                manager.print(jobName, adapter, attributes(settings))
+                Unit
+            }
+        }
     }
 
-    fun printUris(
+    suspend fun printUris(
         context: Context,
         uris: List<Uri>,
         jobName: String,
         settings: PrintSettings
-    ): Result<Unit> = runCatching {
-        require(uris.isNotEmpty()) { "Selecione pelo menos uma página." }
-        val pdf = PdfUtils.pdfFromUris(context, uris)
-        val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-        val adapter = PdfFilePrintAdapter(pdf, jobName, uris.size)
-        manager.print(jobName, adapter, attributes(settings))
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            require(uris.isNotEmpty()) { "Selecione pelo menos uma página." }
+            val pdf = PdfUtils.pdfFromUris(context, uris)
+            withContext(Dispatchers.Main) {
+                val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
+                val adapter = PdfFilePrintAdapter(pdf, jobName, uris.size)
+                manager.print(jobName, adapter, attributes(settings))
+                Unit
+            }
+        }
     }
 
-    fun printText(
+    suspend fun printText(
         context: Context,
         text: String,
         jobName: String,
         settings: PrintSettings
-    ): Result<Unit> = runCatching {
-        val (pdf, pages) = PdfUtils.pdfFromText(context, text)
-        val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-        val adapter = PdfFilePrintAdapter(pdf, jobName, pages)
-        manager.print(jobName, adapter, attributes(settings))
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val (pdf, pages) = PdfUtils.pdfFromText(context, text)
+            withContext(Dispatchers.Main) {
+                val manager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
+                val adapter = PdfFilePrintAdapter(pdf, jobName, pages)
+                manager.print(jobName, adapter, attributes(settings))
+                Unit
+            }
+        }
     }
 
     fun printWebView(

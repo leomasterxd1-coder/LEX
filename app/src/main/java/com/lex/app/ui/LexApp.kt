@@ -118,7 +118,7 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
 
     val bottomDestinations = listOf(
         Triple(Routes.HOME, "Início", Icons.Filled.Home),
-        Triple(Routes.DEVICES, "Localizar", Icons.Filled.Search),
+        Triple(Routes.DEVICES, "Localizar\ndispositivo", Icons.Filled.Search),
         Triple(Routes.QUEUE, "Status", Icons.Filled.History),
         Triple(Routes.MORE, "Mais", Icons.Filled.MoreHoriz)
     )

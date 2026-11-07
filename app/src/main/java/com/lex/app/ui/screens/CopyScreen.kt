@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -35,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +57,7 @@ import com.lex.app.ui.components.LexTopBar
 import com.lex.app.ui.components.SectionHeader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
 @Composable
 fun CopyScreen(
@@ -65,6 +68,8 @@ fun CopyScreen(
     val context = LocalContext.current
     var page by remember { mutableStateOf<Uri?>(null) }
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    var copying by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val camera = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -94,21 +99,26 @@ fun CopyScreen(
             Toast.makeText(context, "Adicione um dispositivo primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
-        PrintController.printUri(context, uri, "Cópia LEX", state.printSettings)
-            .onSuccess {
-                onCreateJob(
-                    "Copiar",
-                    JobKind.COPY,
-                    state.printSettings.copies,
-                    state.printSettings.color,
-                    state.printSettings.duplex,
-                    "Enviado para ${device.name}"
-                )
-                Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
-            }
-            .onFailure {
-                Toast.makeText(context, it.message ?: "Não foi possível copiar.", Toast.LENGTH_LONG).show()
-            }
+        if (copying) return
+        copying = true
+        scope.launch {
+            PrintController.printUri(context, uri, "Cópia LEX", state.printSettings)
+                .onSuccess {
+                    onCreateJob(
+                        "Copiar",
+                        JobKind.COPY,
+                        state.printSettings.copies,
+                        state.printSettings.color,
+                        state.printSettings.duplex,
+                        "Enviado para ${device.name}"
+                    )
+                    Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
+                }
+                .onFailure {
+                    Toast.makeText(context, it.message ?: "Não foi possível copiar.", Toast.LENGTH_LONG).show()
+                }
+            copying = false
+        }
     }
 
     Scaffold(topBar = { LexTopBar(title = "Copiar", onBack = onBack) }) { innerPadding ->
@@ -181,13 +191,22 @@ fun CopyScreen(
 
             Button(
                 onClick = ::copy,
+                enabled = !copying,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Icon(Icons.Filled.ContentCopy, contentDescription = null)
-                Spacer(Modifier.padding(horizontal = 6.dp))
-                Text("Copiar")
+                if (copying) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Icon(Icons.Filled.ContentCopy, contentDescription = null)
+                    Spacer(Modifier.padding(horizontal = 6.dp))
+                    Text("Copiar")
+                }
             }
         }
     }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +57,7 @@ import com.lex.app.ui.components.InfoRow
 import com.lex.app.ui.components.LexTopBar
 import com.lex.app.ui.components.SectionHeader
 import com.lex.app.ui.components.SwitchRow
+import kotlinx.coroutines.launch
 
 @Composable
 fun PrintScreen(
@@ -71,8 +75,9 @@ fun PrintScreen(
     var selectedName by remember { mutableStateOf("") }
     var selectedMeta by remember { mutableStateOf("") }
     var selectedDeviceId by remember { mutableStateOf(state.defaultDevice?.id) }
-    var showSettings by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
+    var printing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(state.defaultDevice?.id) {
         if (selectedDeviceId == null) selectedDeviceId = state.defaultDevice?.id
@@ -127,25 +132,35 @@ fun PrintScreen(
             Toast.makeText(context, "Este dispositivo não suporta impressão.", Toast.LENGTH_SHORT).show()
             return
         }
-        PrintController.printUri(context, uri, selectedName.ifBlank { "Documento" }, printSettings)
-            .onSuccess {
-                onCreateJob(
-                    selectedName.ifBlank { "Documento" },
-                    JobKind.PRINT,
-                    printSettings.copies,
-                    printSettings.color,
-                    printSettings.duplex,
-                    "Enviado para ${selectedDevice.name}"
-                )
-                Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
-            }
-            .onFailure {
-                Toast.makeText(
-                    context,
-                    it.message ?: "Não foi possível iniciar a impressão.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        if (printing) return
+        printing = true
+        scope.launch {
+            PrintController.printUri(
+                context,
+                uri,
+                selectedName.ifBlank { "Documento" },
+                printSettings
+            )
+                .onSuccess {
+                    onCreateJob(
+                        selectedName.ifBlank { "Documento" },
+                        JobKind.PRINT,
+                        printSettings.copies,
+                        printSettings.color,
+                        printSettings.duplex,
+                        "Enviado para ${selectedDevice.name}"
+                    )
+                    Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
+                }
+                .onFailure {
+                    Toast.makeText(
+                        context,
+                        it.message ?: "Não foi possível iniciar a impressão.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            printing = false
+        }
     }
 
     Scaffold(
@@ -290,13 +305,22 @@ fun PrintScreen(
 
             Button(
                 onClick = { performPrint() },
+                enabled = !printing,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Icon(Icons.Filled.Print, contentDescription = null)
-                Spacer(Modifier.padding(horizontal = 6.dp))
-                Text("Imprimir")
+                if (printing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Icon(Icons.Filled.Print, contentDescription = null)
+                    Spacer(Modifier.padding(horizontal = 6.dp))
+                    Text("Imprimir")
+                }
             }
 
             SectionHeader(title = "Mais formas de imprimir")

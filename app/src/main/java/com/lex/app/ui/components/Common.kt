@@ -1,6 +1,7 @@
 package com.lex.app.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,8 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -51,8 +51,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.lex.app.data.Device
 import com.lex.app.data.DeviceStatus
 import com.lex.app.data.JobStatus
@@ -96,14 +98,50 @@ fun LexBottomBar(
     onSelect: (String) -> Unit,
     destinations: List<Triple<String, String, ImageVector>>
 ) {
-    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-        destinations.forEach { (route, label, icon) ->
-            NavigationBarItem(
-                selected = currentRoute == route,
-                onClick = { onSelect(route) },
-                icon = { Icon(icon, contentDescription = label) },
-                label = { Text(label) }
-            )
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 8.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .height(84.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            destinations.forEach { (route, label, icon) ->
+                val selected = currentRoute == route
+                val tint = if (selected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onSelect(route) }
+                        .padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = label.replace('\n', ' '),
+                        tint = tint,
+                        modifier = Modifier.size(26.dp)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = tint,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        lineHeight = 14.sp
+                    )
+                }
+            }
         }
     }
 }

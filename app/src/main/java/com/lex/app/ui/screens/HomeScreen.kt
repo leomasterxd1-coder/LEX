@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,13 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.Scanner
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -42,10 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.lex.app.R
 import com.lex.app.data.Device
 import com.lex.app.data.DeviceStatus
 import com.lex.app.ui.theme.LexAmber
@@ -54,8 +51,7 @@ import com.lex.app.ui.theme.LexRed
 
 private data class SourceTile(
     val label: String,
-    val icon: ImageVector,
-    val tint: Color
+    val iconRes: Int
 )
 
 @Composable
@@ -71,15 +67,15 @@ fun HomeScreen(
     onEditSources: () -> Unit
 ) {
     val tiles = listOf(
-        SourceTile("Câmera", Icons.Filled.PhotoCamera, Color(0xFF5C5C5C)),
-        SourceTile("Fotografias", Icons.Filled.PhotoLibrary, Color(0xFF2E7D32)),
-        SourceTile("Arquivos", Icons.Filled.Folder, Color(0xFF2E7D32)),
-        SourceTile("Web", Icons.Filled.Language, Color(0xFF1565C0)),
-        SourceTile("Digitalizar", Icons.Filled.Scanner, Color(0xFF2E7D32))
+        SourceTile("Câmera", R.drawable.ic_source_camera),
+        SourceTile("Fotografias", R.drawable.ic_source_photos),
+        SourceTile("Arquivos", R.drawable.ic_source_files),
+        SourceTile("Web", R.drawable.ic_source_web),
+        SourceTile("Digitalizar", R.drawable.ic_source_scanner)
     )
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = MaterialTheme.colorScheme.surface,
         bottomBar = {
             if (device != null) {
                 SelectedDeviceBar(device = device, onClick = { onOpenDevice(device.id) })
@@ -95,6 +91,20 @@ fun HomeScreen(
                         .padding(horizontal = 24.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_stat_lex),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(10.dp))
                     Text(
                         "LEX",
                         style = MaterialTheme.typography.headlineSmall,
@@ -167,12 +177,12 @@ private fun SourceTileCard(tile: SourceTile, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.05f),
-        shape = RoundedCornerShape(8.dp),
+            .aspectRatio(1.22f),
+        shape = RoundedCornerShape(6.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
     ) {
         Column(
             modifier = Modifier
@@ -182,10 +192,10 @@ private fun SourceTileCard(tile: SourceTile, onClick: () -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                imageVector = tile.icon,
+                painter = painterResource(tile.iconRes),
                 contentDescription = tile.label,
-                tint = tile.tint,
-                modifier = Modifier.size(50.dp)
+                tint = Color.Unspecified,
+                modifier = Modifier.size(56.dp)
             )
             Spacer(Modifier.height(10.dp))
             Text(
@@ -243,9 +253,9 @@ private fun SelectedDeviceBar(device: Device, onClick: () -> Unit) {
         }
         Box(contentAlignment = Alignment.BottomStart) {
             Icon(
-                Icons.Filled.Print,
+                painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
-                tint = Color(0xFFD6D6D6),
+                tint = Color.Unspecified,
                 modifier = Modifier.size(64.dp)
             )
             if (device.isDefault) {

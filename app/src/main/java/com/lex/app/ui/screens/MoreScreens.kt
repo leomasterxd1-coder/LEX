@@ -49,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,6 +68,9 @@ import com.lex.app.ui.components.DropdownChoice
 import com.lex.app.ui.components.LexTopBar
 import com.lex.app.ui.components.SectionHeader
 import com.lex.app.ui.components.SwitchRow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun MoreScreen(
@@ -413,11 +417,14 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "LEX 1.0.1",
+                "LEX 1.0.2",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-            Bullet("Tema vermelho vivo implementado com Material 3.")
+            Bullet("Tema vermelho vivo implementado com Material 3 e fundo branco na tela inicial.")
+            Bullet("Dispositivo selecionado em destaque acima da navegação inferior.")
+            Bullet("Geração de PDF e digitalização em segundo plano, com indicadores de progresso.")
+            Bullet("APK otimizado com R8: muito menor e com inicialização mais rápida.")
             Bullet("Imprima arquivos, fotos e páginas da web pelo sistema de impressão do Android.")
             Bullet("Digitalize com a câmera, o seletor de fotos ou uma página de scanner simulada.")
             Bullet("Descubra impressoras compatíveis com NSD/mDNS e adicione dispositivos manualmente.")
@@ -516,17 +523,22 @@ fun ImportDataScreen(
 ) {
     val context = LocalContext.current
     var text by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     val filePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            runCatching {
-                context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-            }.onSuccess { content ->
-                text = content.orEmpty()
-            }.onFailure {
-                Toast.makeText(context, "Não foi possível ler o arquivo.", Toast.LENGTH_SHORT).show()
+            scope.launch {
+                val content = withContext(Dispatchers.IO) {
+                    runCatching {
+                        context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                    }
+                }
+                content.onSuccess { text = it.orEmpty() }
+                    .onFailure {
+                        Toast.makeText(context, "Não foi possível ler o arquivo.", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
     }

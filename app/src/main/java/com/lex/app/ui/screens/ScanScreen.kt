@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Scanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +64,7 @@ import com.lex.app.ui.components.LexTopBar
 import com.lex.app.ui.components.SectionHeader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -78,6 +81,8 @@ fun ScanScreen(
     val context = LocalContext.current
     var pages by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val camera = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -105,7 +110,13 @@ fun ScanScreen(
     }
 
     fun simulated() {
-        pages = pages + PdfUtils.createSimulatedScan(context)
+        if (busy) return
+        busy = true
+        scope.launch {
+            val uri = withContext(Dispatchers.IO) { PdfUtils.createSimulatedScan(context) }
+            pages = pages + uri
+            busy = false
+        }
     }
 
     val scanner = state.defaultDevice
@@ -116,26 +127,35 @@ fun ScanScreen(
             Toast.makeText(context, "Adicione pelo menos uma página primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
-        runCatching {
-            val pdf = PdfUtils.pdfFromUris(context, pages)
-            val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-            PdfUtils.savePdfToDownloads(context, pdf, "LEX_Scan_$stamp.pdf")
-        }.onSuccess { uri ->
-            if (uri != null) {
-                onCreateJob(
-                    "Digitalização de ${pages.size} página(s)",
-                    JobKind.SCAN,
-                    pages.size,
-                    scanSettings.colorMode != "Preto e branco",
-                    false,
-                    "Salvo em Downloads/LEX"
-                )
-                Toast.makeText(context, "Salvo em Downloads/LEX", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(context, "Não foi possível salvar o PDF.", Toast.LENGTH_LONG).show()
+        if (busy) return
+        val snapshot = pages
+        busy = true
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    val pdf = PdfUtils.pdfFromUris(context, snapshot)
+                    val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                    PdfUtils.savePdfToDownloads(context, pdf, "LEX_Scan_$stamp.pdf")
+                }
             }
-        }.onFailure {
-            Toast.makeText(context, it.message ?: "Não foi possível criar o PDF.", Toast.LENGTH_LONG).show()
+            result.onSuccess { uri ->
+                if (uri != null) {
+                    onCreateJob(
+                        "Digitalização de ${snapshot.size} página(s)",
+                        JobKind.SCAN,
+                        snapshot.size,
+                        scanSettings.colorMode != "Preto e branco",
+                        false,
+                        "Salvo em Downloads/LEX"
+                    )
+                    Toast.makeText(context, "Salvo em Downloads/LEX", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, "Não foi possível salvar o PDF.", Toast.LENGTH_LONG).show()
+                }
+            }.onFailure {
+                Toast.makeText(context, it.message ?: "Não foi possível criar o PDF.", Toast.LENGTH_LONG).show()
+            }
+            busy = false
         }
     }
 
@@ -148,23 +168,29 @@ fun ScanScreen(
             Toast.makeText(context, "Adicione um dispositivo antes de imprimir.", Toast.LENGTH_SHORT).show()
             return
         }
-        PrintController.printUris(
-            context,
-            pages,
-            "Digitalização LEX",
-            printSettings.copy(color = scanSettings.colorMode != "Preto e branco")
-        ).onSuccess {
-            onCreateJob(
-                "Digitalização de ${pages.size} página(s)",
-                JobKind.SCAN,
-                pages.size,
-                scanSettings.colorMode != "Preto e branco",
-                false,
-                "Enviado para ${scanner.name}"
-            )
-            Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
-        }.onFailure {
-            Toast.makeText(context, it.message ?: "Não foi possível imprimir.", Toast.LENGTH_LONG).show()
+        if (busy) return
+        val snapshot = pages
+        busy = true
+        scope.launch {
+            PrintController.printUris(
+                context,
+                snapshot,
+                "Digitalização LEX",
+                printSettings.copy(color = scanSettings.colorMode != "Preto e branco")
+            ).onSuccess {
+                onCreateJob(
+                    "Digitalização de ${snapshot.size} página(s)",
+                    JobKind.SCAN,
+                    snapshot.size,
+                    scanSettings.colorMode != "Preto e branco",
+                    false,
+                    "Enviado para ${scanner.name}"
+                )
+                Toast.makeText(context, "Abrindo a janela de impressão do Android…", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(context, it.message ?: "Não foi possível imprimir.", Toast.LENGTH_LONG).show()
+            }
+            busy = false
         }
     }
 
@@ -336,25 +362,46 @@ fun ScanScreen(
 
             Button(
                 onClick = ::savePdf,
+                enabled = !busy,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Icon(Icons.Filled.PictureAsPdf, contentDescription = null)
-                Spacer(Modifier.padding(horizontal = 6.dp))
-                Text("Salvar PDF")
+                if (busy) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Icon(Icons.Filled.PictureAsPdf, contentDescription = null)
+                    Spacer(Modifier.padding(horizontal = 6.dp))
+                    Text("Salvar PDF")
+                }
             }
             OutlinedButton(
                 onClick = ::printPages,
+                enabled = !busy,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Icon(Icons.Filled.Print, contentDescription = null)
-                Spacer(Modifier.padding(horizontal = 6.dp))
-                Text("Imprimir digitalização")
+                if (busy) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(Icons.Filled.Print, contentDescription = null)
+                    Spacer(Modifier.padding(horizontal = 6.dp))
+                    Text("Imprimir digitalização")
+                }
             }
-            OutlinedButton(onClick = ::simulated, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(
+                onClick = ::simulated,
+                enabled = !busy,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Icon(Icons.Filled.Add, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 4.dp))
                 Text("Adicionar página simulada")
