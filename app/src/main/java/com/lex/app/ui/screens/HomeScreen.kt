@@ -46,6 +46,7 @@ import com.lex.app.R
 import com.lex.app.data.Device
 import com.lex.app.data.DeviceStatus
 import com.lex.app.ui.theme.LexAmber
+import com.lex.app.ui.theme.LexChrome
 import com.lex.app.ui.theme.LexGreen
 import com.lex.app.ui.theme.LexRed
 
@@ -86,7 +87,7 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF4A4A4A))
+                        .background(LexChrome)
                         .statusBarsPadding()
                         .padding(horizontal = 24.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically

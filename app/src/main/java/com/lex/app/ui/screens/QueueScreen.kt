@@ -1,37 +1,39 @@
 package com.lex.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material3.Button
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lex.app.data.AppData
 import com.lex.app.data.JobStatus
-import com.lex.app.ui.components.EmptyState
 import com.lex.app.ui.components.JobCard
 import com.lex.app.ui.components.LexTopBar
-import com.lex.app.ui.components.SectionHeader
 
 @Composable
 fun QueueScreen(
@@ -43,116 +45,79 @@ fun QueueScreen(
     onClearFinished: () -> Unit,
     onOpenDevices: () -> Unit
 ) {
-    val pending = state.jobs.count {
-        it.status == JobStatus.QUEUED || it.status == JobStatus.HELD
+    var selectedTab by remember { mutableIntStateOf(0) }
+    val currentJobs = state.jobs.filter {
+        it.status == JobStatus.QUEUED ||
+            it.status == JobStatus.HELD ||
+            it.status == JobStatus.PROCESSING
     }
-    val completed = state.jobs.count { it.status == JobStatus.COMPLETED }
-    val failed = state.jobs.count { it.status == JobStatus.FAILED }
+    val historyJobs = state.jobs.filter {
+        it.status == JobStatus.COMPLETED || it.status == JobStatus.FAILED
+    }
 
     Scaffold(
-        topBar = { LexTopBar(title = "Filas", onBack = onBack) }
+        topBar = { LexTopBar(title = "Status do trabalho", onBack = onBack) }
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(innerPadding)
         ) {
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Filled.History,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Text(
-                                "  Fila de trabalhos",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    text = {
                         Text(
-                            "$pending pendentes · $completed concluídos · $failed com falha",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            "ATUAL",
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.labelLarge
                         )
-                        androidx.compose.foundation.layout.Spacer(
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(
-                                onClick = onReleaseAll,
-                                enabled = pending > 0,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                Icon(Icons.Filled.Print, contentDescription = null)
-                                Text("  Liberar tudo")
-                            }
-                            OutlinedButton(
-                                onClick = onClearFinished,
-                                enabled = completed + failed > 0,
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                ),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer)
-                            ) { Text("Limpar concluídos") }
-                        }
                     }
-                }
-            }
-
-            item {
-                SectionHeader(
-                    title = "Trabalhos (${state.jobs.size})",
-                    actionLabel = if (state.devices.isEmpty()) "Adicionar dispositivo" else null,
-                    onAction = if (state.devices.isEmpty()) onOpenDevices else null
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    text = {
+                        Text(
+                            "HISTÓRICO",
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
                 )
             }
 
-            if (state.jobs.isEmpty()) {
-                item {
-                    EmptyState(
-                        icon = Icons.Filled.History,
-                        title = "A fila está vazia",
-                        message = "Imprima, copie ou digitalize um documento e o trabalho aparecerá aqui."
-                    )
-                }
+            val jobs = if (selectedTab == 0) currentJobs else historyJobs
+            if (jobs.isEmpty()) {
+                JobEmptyState(history = selectedTab == 1)
             } else {
-                items(state.jobs, key = { it.id }) { job ->
-                    JobCard(
-                        job = job,
-                        onRelease = { onRelease(job.id) },
-                        onDelete = { onDelete(job.id) }
-                    )
-                }
-            }
-
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "Sobre a liberação de trabalhos",
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            "Em uma implantação real de impressão segura, os trabalhos ficam retidos até você se autenticar na impressora. No LEX, Liberar simula esse fluxo localmente.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            if (selectedTab == 0) {
+                                TextButton(onClick = onReleaseAll) { Text("Liberar tudo") }
+                            } else {
+                                TextButton(onClick = onClearFinished) { Text("Limpar histórico") }
+                            }
+                        }
+                    }
+                    items(jobs, key = { it.id }) { job ->
+                        JobCard(
+                            job = job,
+                            onRelease = { onRelease(job.id) },
+                            onDelete = { onDelete(job.id) }
                         )
                     }
                 }
@@ -162,6 +127,25 @@ fun QueueScreen(
 }
 
 @Composable
-private fun RowSpacer() {
-    androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+private fun JobEmptyState(history: Boolean) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Filled.History,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.16f),
+            modifier = Modifier.size(190.dp)
+        )
+        Text(
+            text = if (history) "Nenhum trabalho no histórico." else "Nenhum trabalho atual.",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Normal,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
 }

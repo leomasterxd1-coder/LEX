@@ -60,6 +60,7 @@ import com.lex.app.data.DeviceStatus
 import com.lex.app.data.JobStatus
 import com.lex.app.data.PrintJob
 import com.lex.app.ui.theme.LexAmber
+import com.lex.app.ui.theme.LexChrome
 import com.lex.app.ui.theme.LexGreen
 import com.lex.app.ui.theme.LexRed
 import java.text.SimpleDateFormat
@@ -84,10 +85,10 @@ fun LexTopBar(
         },
         actions = actions,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = LexChrome,
+            titleContentColor = Color.White,
+            navigationIconContentColor = Color.White,
+            actionIconContentColor = Color.White
         )
     )
 }

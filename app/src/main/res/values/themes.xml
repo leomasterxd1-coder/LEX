@@ -2,9 +2,10 @@
 <resources>
     <style name="Theme.LEX" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/lex_background</item>
-        <item name="android:statusBarColor">@color/lex_red_dark</item>
-        <item name="android:navigationBarColor">@color/lex_red_dark</item>
+        <item name="android:statusBarColor">@color/lex_chrome</item>
+        <item name="android:navigationBarColor">@color/lex_background</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>

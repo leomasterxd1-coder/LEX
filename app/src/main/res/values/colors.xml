@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="lex_chrome">#4A4A4A</color>
     <color name="lex_red">#E60000</color>
     <color name="lex_red_dark">#B30000</color>
     <color name="lex_background">#FFFFFF</color>

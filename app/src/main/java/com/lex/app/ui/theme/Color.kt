@@ -2,6 +2,7 @@ package com.lex.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+val LexChrome = Color(0xFF4A4A4A)
 val LexRed = Color(0xFFE60000)
 val LexRedDark = Color(0xFFB30000)
 val LexRedDeep = Color(0xFF5C0000)

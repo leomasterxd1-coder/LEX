@@ -48,6 +48,7 @@ import com.lex.app.ui.screens.OpenSourceScreen
 import com.lex.app.ui.screens.PrintScreen
 import com.lex.app.ui.screens.QueueScreen
 import com.lex.app.ui.screens.ScanScreen
+import com.lex.app.ui.screens.SelectDeviceScreen
 import com.lex.app.ui.screens.SettingsScreen
 import com.lex.app.ui.screens.SourcesScreen
 import com.lex.app.ui.screens.WebPrintScreen
@@ -70,6 +71,7 @@ object Routes {
     const val OPEN_SOURCE = "opensource"
     const val IMPORT_DATA = "importdata"
     const val SOURCES = "sources"
+    const val SELECT_DEVICE = "selectdevice"
     const val DEVICE = "device/{id}"
 
     fun device(id: String) = "device/$id"
@@ -174,7 +176,7 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
                     composable(Routes.HOME) {
                         HomeScreen(
                             device = state.defaultDevice,
-                            onOpenDevice = { id -> navController.navigate(Routes.device(id)) },
+                            onOpenDevice = { navController.navigate(Routes.SELECT_DEVICE) },
                             onFindDevices = { navigateTopLevel(Routes.DEVICES) },
                             onOpenCamera = { navController.navigate(Routes.SCAN) },
                             onOpenPhotos = { navController.navigate(Routes.SCAN) },
@@ -331,6 +333,9 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
                     composable(Routes.ABOUT) {
                         AboutScreen(
                             onBack = { navController.popBackStack() },
+                            onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                            onOpenDataCollection = { navController.navigate(Routes.DATA_COLLECTION) },
+                            onOpenImport = { navController.navigate(Routes.IMPORT_DATA) },
                             onOpenOpenSource = { navController.navigate(Routes.OPEN_SOURCE) }
                         )
                     }
@@ -364,6 +369,15 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
                             state = state,
                             onBack = { navController.popBackStack() },
                             onToggleSource = viewModel::toggleSource
+                        )
+                    }
+
+                    composable(Routes.SELECT_DEVICE) {
+                        SelectDeviceScreen(
+                            state = state,
+                            onBack = { navController.popBackStack() },
+                            onOpenDetail = { id -> navController.navigate(Routes.device(id)) },
+                            onAddDevice = { navigateTopLevel(Routes.DEVICES) }
                         )
                     }
 

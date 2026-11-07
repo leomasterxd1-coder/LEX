@@ -1,16 +1,25 @@
 package com.lex.app.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.filled.QrCode2
+import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Wifi
@@ -20,6 +29,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +46,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lex.app.data.AppData
 import com.lex.app.data.Device
@@ -62,14 +75,22 @@ fun DevicesScreen(
     onAddDemoDevice: () -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
+    var showCloud by remember { mutableStateOf(false) }
+    var showQr by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             LexTopBar(
-                title = "Dispositivos",
+                title = "Localizar dispositivo",
                 actions = {
-                    TextButton(onClick = { showAddDialog = true }) {
-                        Text("Adicionar", color = MaterialTheme.colorScheme.onPrimary)
+                    IconButton(
+                        onClick = { if (discovering) onStopDiscovery() else onStartDiscovery() }
+                    ) {
+                        Icon(Icons.Filled.Refresh, contentDescription = "Buscar novamente")
+                    }
+                    IconButton(onClick = { showHelp = true }) {
+                        Icon(Icons.Filled.HelpOutline, contentDescription = "Ajuda")
                     }
                 }
             )
@@ -77,122 +98,77 @@ fun DevicesScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Filled.Wifi,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(Modifier.padding(horizontal = 6.dp))
-                        Text(
-                            "Buscar dispositivos",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                    Spacer(Modifier.height(6.dp))
+            if (discovering) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 48.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        discoveryStatus ?: "Descubra impressoras compatíveis na sua rede Wi-Fi.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        "Buscando rede...",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    if (discovering) {
-                        Spacer(Modifier.height(10.dp))
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(
-                            onClick = if (discovering) onStopDiscovery else onStartDiscovery,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                contentColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Icon(
-                                if (discovering) Icons.Filled.Refresh else Icons.Filled.Wifi,
-                                contentDescription = null
-                            )
-                            Spacer(Modifier.padding(horizontal = 4.dp))
-                            Text(if (discovering) "Parar" else "Buscar dispositivos")
-                        }
-                        OutlinedButton(
-                            onClick = { showAddDialog = true },
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer)
-                        ) {
-                            Icon(Icons.Filled.Add, contentDescription = null)
-                            Spacer(Modifier.padding(horizontal = 4.dp))
-                            Text("Manual")
-                        }
-                    }
+                    Spacer(Modifier.height(16.dp))
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    )
                 }
-            }
-
-            if (discovered.isNotEmpty()) {
-                SectionHeader(title = "Encontrados (${discovered.size})")
+                Spacer(Modifier.height(180.dp))
+            } else if (discovered.isNotEmpty()) {
+                DevicesSectionLabel("ENCONTRADOS")
                 discovered.forEach { device ->
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(device.name, fontWeight = FontWeight.SemiBold)
-                                Text(
-                                    listOf(device.model, device.address)
-                                        .filter { it.isNotBlank() }.joinToString(" · "),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Button(onClick = { onAddDevice(device) }) { Text("Adicionar") }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(device.name, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                listOf(device.model, device.address)
+                                    .filter { it.isNotBlank() }
+                                    .joinToString(" · "),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
+                        Button(onClick = { onAddDevice(device) }) { Text("Adicionar") }
                     }
                 }
+                Spacer(Modifier.height(16.dp))
+            } else {
+                Spacer(Modifier.height(32.dp))
+                Text(
+                    discoveryStatus ?: "Nenhum dispositivo encontrado.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(180.dp))
             }
 
-            SectionHeader(
-                title = "Dispositivos salvos (${state.devices.size})",
-                actionLabel = "Fila",
-                onAction = onOpenQueue
-            )
-            if (state.devices.isEmpty()) {
-                EmptyState(
-                    icon = Icons.Filled.Print,
-                    title = "Nenhum dispositivo salvo",
-                    message = "Encontre uma impressora na rede, adicione manualmente ou use o dispositivo de demonstração.",
-                    actionLabel = "Adicionar dispositivo de demonstração",
-                    onAction = onAddDemoDevice
-                )
-            } else {
-                state.devices.forEach { device ->
-                    DeviceCard(
-                        device = device,
-                        onClick = { onOpenDevice(device.id) },
-                        onSetDefault = { onSetDefault(device.id) }
-                    )
-                }
+            DevicesSectionLabel("OUTRO")
+            DeviceListRow(Icons.Filled.Cloud, "Nuvem de gerenciamento de impressão") {
+                showCloud = true
+            }
+            DeviceListRow(Icons.Filled.SettingsEthernet, "Inserir endereço de rede") {
+                showAddDialog = true
+            }
+            DeviceListRow(Icons.Filled.QrCode2, "Código de QR") {
+                showQr = true
             }
         }
     }
@@ -206,6 +182,91 @@ fun DevicesScreen(
             }
         )
     }
+
+    if (showHelp) {
+        AlertDialog(
+            onDismissRequest = { showHelp = false },
+            title = { Text("Ajuda") },
+            text = {
+                Column {
+                    Text("• Verifique se o celular e a impressora estão na mesma rede.")
+                    Spacer(Modifier.height(8.dp))
+                    Text("• Verifique se a impressora está ligada e pronta.")
+                    Spacer(Modifier.height(8.dp))
+                    Text("• Se a busca falhar, use “Inserir endereço de rede”.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showHelp = false }) { Text("Fechar") }
+            }
+        )
+    }
+
+    if (showCloud) {
+        AlertDialog(
+            onDismissRequest = { showCloud = false },
+            title = { Text("Nuvem de gerenciamento de impressão") },
+            text = { Text("Este recurso é uma demonstração nesta versão independente do LEX.") },
+            confirmButton = {
+                TextButton(onClick = { showCloud = false }) { Text("Fechar") }
+            }
+        )
+    }
+
+    if (showQr) {
+        AlertDialog(
+            onDismissRequest = { showQr = false },
+            title = { Text("Código de QR") },
+            text = { Text("A leitura de QR estará disponível em breve nesta versão independente.") },
+            confirmButton = {
+                TextButton(onClick = { showQr = false }) { Text("Fechar") }
+            }
+        )
+    }
+}
+
+@Composable
+private fun DevicesSectionLabel(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
+private fun DeviceListRow(icon: ImageVector, title: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(26.dp)
+        )
+        Spacer(Modifier.width(20.dp))
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 62.dp),
+        thickness = 0.5.dp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
+    )
 }
 
 @Composable

@@ -3,6 +3,8 @@ package com.lex.app.ui.screens
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +23,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
@@ -30,6 +35,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
@@ -37,6 +43,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -85,78 +93,80 @@ fun MoreScreen(
     onOpenDataCollection: () -> Unit,
     onOpenOpenSource: () -> Unit
 ) {
-    Scaffold(topBar = { LexTopBar(title = "Mais") }) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "LEX ${BuildConfig.VERSION_NAME}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Text(
-                            "${state.devices.size} dispositivo(s) · ${state.jobs.size} trabalho(s)",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+    Scaffold(
+        topBar = {
+            LexTopBar(
+                title = "Mais",
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Configurações")
                     }
                 }
-            }
-            item { MoreRow(Icons.Filled.Devices, "Gerenciar dispositivos", "Adicione, descubra e remova impressoras", onOpenDevices) }
-            item { MoreRow(Icons.Filled.FolderOpen, "Gerenciar fontes", "Arquivos, fotos, câmera, web e nuvem", onOpenSources) }
-            item { MoreRow(Icons.Filled.History, "Fila de impressão", "Trabalhos retidos e liberação", onOpenQueue) }
-            item { MoreRow(Icons.Filled.Input, "Importar dados", "Traga dispositivos de outro aplicativo", onOpenImport) }
-            item { MoreRow(Icons.Filled.Settings, "Configurações", "Padrões de impressão e digitalização", onOpenSettings) }
-            item { MoreRow(Icons.Filled.PrivacyTip, "Coleta de dados", "Controles de privacidade", onOpenDataCollection) }
-            item { MoreRow(Icons.Filled.NewReleases, "Novidades", "Notas de versão do LEX", onOpenWhatsNew) }
-            item { MoreRow(Icons.Filled.Code, "Licenças de código aberto", "Bibliotecas usadas pelo LEX", onOpenOpenSource) }
-            item { MoreRow(Icons.Filled.Info, "Sobre o LEX", "Versão e aviso legal", onOpenAbout) }
-            item { MoreRow(Icons.Filled.HelpOutline, "Ajuda", "Dicas de conexão e impressão", onOpenAbout) }
-            item {
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    "O LEX é um projeto independente, criado do zero. Não é afiliado, endossado ou patrocinado pela Lexmark.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+        ) {
+            MoreSectionHeader("GERENCIAR")
+            MoreListRow(Icons.Filled.Devices, "Dispositivos", onOpenDevices)
+            MoreListRow(Icons.Filled.GridView, "Fontes", onOpenSources)
+            MoreSectionHeader("GERAL")
+            MoreListRow(Icons.Filled.Info, "Sobre", onOpenAbout)
+            MoreListRow(Icons.Filled.Star, "O que há de novo", onOpenWhatsNew)
         }
     }
 }
 
 @Composable
-private fun MoreRow(icon: ImageVector, title: String, subtitle: String, onClick: () -> Unit) {
-    ElevatedCard(onClick = onClick) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.padding(horizontal = 8.dp))
-            Column {
-                Text(title, fontWeight = FontWeight.SemiBold)
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+private fun MoreSectionHeader(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
+private fun MoreListRow(
+    icon: ImageVector,
+    title: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(26.dp)
+        )
+        Spacer(Modifier.width(20.dp))
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 62.dp),
+        thickness = 0.5.dp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
+    )
 }
 
 @Composable
@@ -343,7 +353,13 @@ private fun NumberStepper(label: String, value: Int, onChange: (Int) -> Unit) {
 }
 
 @Composable
-fun AboutScreen(onBack: () -> Unit, onOpenOpenSource: () -> Unit) {
+fun AboutScreen(
+    onBack: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenDataCollection: () -> Unit,
+    onOpenImport: () -> Unit,
+    onOpenOpenSource: () -> Unit
+) {
     Scaffold(topBar = { LexTopBar(title = "Sobre o LEX", onBack = onBack) }) { innerPadding ->
         Column(
             modifier = Modifier
@@ -391,6 +407,24 @@ fun AboutScreen(onBack: () -> Unit, onOpenOpenSource: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(16.dp))
+            OutlinedButton(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Filled.Settings, contentDescription = null)
+                Spacer(Modifier.padding(horizontal = 4.dp))
+                Text("Configurações")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = onOpenDataCollection, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Filled.PrivacyTip, contentDescription = null)
+                Spacer(Modifier.padding(horizontal = 4.dp))
+                Text("Coleta de dados")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = onOpenImport, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Filled.Input, contentDescription = null)
+                Spacer(Modifier.padding(horizontal = 4.dp))
+                Text("Importar dados")
+            }
+            Spacer(Modifier.height(8.dp))
             OutlinedButton(onClick = onOpenOpenSource, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Code, contentDescription = null)
                 Spacer(Modifier.padding(horizontal = 4.dp))
@@ -417,7 +451,7 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "LEX 1.0.2",
+                "LEX 1.0.3",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -425,6 +459,7 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             Bullet("Dispositivo selecionado em destaque acima da navegação inferior.")
             Bullet("Geração de PDF e digitalização em segundo plano, com indicadores de progresso.")
             Bullet("APK otimizado com R8: muito menor e com inicialização mais rápida.")
+            Bullet("Fundo branco forçado mesmo quando o aparelho está no modo escuro.")
             Bullet("Imprima arquivos, fotos e páginas da web pelo sistema de impressão do Android.")
             Bullet("Digitalize com a câmera, o seletor de fotos ou uma página de scanner simulada.")
             Bullet("Descubra impressoras compatíveis com NSD/mDNS e adicione dispositivos manualmente.")
