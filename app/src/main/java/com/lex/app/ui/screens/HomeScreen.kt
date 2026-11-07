@@ -178,7 +178,7 @@ private fun SourceTileCard(tile: SourceTile, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.22f),
+            .aspectRatio(1.18f),
         shape = RoundedCornerShape(6.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -188,7 +188,7 @@ private fun SourceTileCard(tile: SourceTile, onClick: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(10.dp),
+                .padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -196,15 +196,17 @@ private fun SourceTileCard(tile: SourceTile, onClick: () -> Unit) {
                 painter = painterResource(tile.iconRes),
                 contentDescription = tile.label,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier.size(42.dp)
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(2.dp))
             Text(
                 tile.label,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

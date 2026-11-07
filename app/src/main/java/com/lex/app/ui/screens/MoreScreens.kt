@@ -458,7 +458,7 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "LEX 1.0.4",
+                "LEX 1.0.5",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -469,7 +469,8 @@ fun WhatsNewScreen(onBack: () -> Unit) {
             Bullet("Fundo branco forçado mesmo quando o aparelho está no modo escuro.")
             Bullet("Impressão direta via IP (IPP ou porta 9100), sem a janela nativa do Android.")
             Bullet("Ícones originais portados para a tela inicial.")
-            Bullet("Correção do retorno para a aba Início.")
+            Bullet("Correção definitiva do retorno para a aba Início.")
+            Bullet("Textos dos ícones da tela inicial corrigidos.")
             Bullet("Produzido por Leo Lopes.")
             Bullet("Digitalize com a câmera, o seletor de fotos ou uma página de scanner simulada.")
             Bullet("Descubra impressoras compatíveis com NSD/mDNS e adicione dispositivos manualmente.")

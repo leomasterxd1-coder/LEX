@@ -142,8 +142,11 @@ fun LexApp(viewModel: LexViewModel = viewModel()) {
     fun navigateTopLevel(route: String) {
         if (currentRoute == route) return
         if (route == Routes.HOME) {
-            val returnedHome = navController.popBackStack(Routes.HOME, inclusive = false)
-            if (returnedHome) return
+            navController.navigate(Routes.HOME) {
+                popUpTo(navController.graph.id) { inclusive = true }
+                launchSingleTop = true
+            }
+            return
         }
         navController.navigate(route) {
             popUpTo(Routes.HOME) { saveState = true }
