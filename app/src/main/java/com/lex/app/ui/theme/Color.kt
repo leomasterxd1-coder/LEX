@@ -1,0 +1,27 @@
+package com.lex.app.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val LexRed = Color(0xFFC8102E)
+val LexRedDark = Color(0xFF8F0B20)
+val LexRedDeep = Color(0xFF410006)
+val LexRedContainer = Color(0xFFFFDAD9)
+val LexRedContainerDark = Color(0xFF93001A)
+val LexWarmWhite = Color(0xFFFFF8F7)
+val LexWarmSurface = Color(0xFFFFF8F7)
+val LexWarmSurfaceVariant = Color(0xFFF5DDDB)
+val LexOutline = Color(0xFF857371)
+val LexOnSurface = Color(0xFF221A19)
+val LexOnSurfaceVariant = Color(0xFF534341)
+val LexDarkBackground = Color(0xFF1A1110)
+val LexDarkSurface = Color(0xFF241918)
+val LexDarkSurfaceVariant = Color(0xFF534341)
+val LexDarkOnSurface = Color(0xFFF1DEDC)
+val LexDarkOnSurfaceVariant = Color(0xFFD8C2BF)
+val LexGreen = Color(0xFF2E7D32)
+val LexAmber = Color(0xFFB26A00)
+val ColorPrimaryDark = Color(0xFFFFB3B4)
+val ColorSecondaryDark = Color(0xFFE7BDB8)
+val ColorOutlineDark = Color(0xFFA08C8A)
+val ColorError = Color(0xFFBA1A1A)
+val ColorErrorDark = Color(0xFFFFB4AB)
